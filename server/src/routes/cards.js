@@ -1,6 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const Card = require('../models/Card');
+const mongoose = require('mongoose');
+
+// List of all deck collections
+const DECK_COLLECTIONS = [
+  'GuardiansoftheGalaxy',
+  'Asgard',
+  'IntergalacticWar',
+  'StarkIndustries',
+  'SpiderVerse',
+  'Ragnarok',
+  'MarvelKnights',
+  'Agents',
+  'Mystics',
+  'Eternals',
+  'XMen',
+  'DeadpoolCorps',
+  'Brotherhood',
+  'Neutral',
+  'Special',
+  'Collaboration',
+];
 
 // GET /api/cards - Get all cards with search & filter
 router.get('/', async (req, res) => {
@@ -15,65 +36,103 @@ router.get('/', async (req, res) => {
       rarity,
       sort = 'name',
       page = 1,
-      limit = 20,
+      limit = 24,
     } = req.query;
 
-    const query = {};
-
-    // Text search (name, nameTh, description)
-    if (search && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), 'i');
-      query.$or = [
-        { name: searchRegex },
-        { nameTh: searchRegex },
-        { description: searchRegex },
-        { descriptionTh: searchRegex },
-        { keywords: searchRegex },
-      ];
-    }
-
-    // Filter by faction
+    // Determine which collections to query
+    let collectionsToQuery = DECK_COLLECTIONS;
+    
+    // If faction filter is specified, only query that collection
     if (faction && faction !== 'all') {
-      query.faction = faction;
+      const collectionName = faction.replace(/[^a-zA-Z0-9]/g, '');
+      collectionsToQuery = [collectionName];
     }
 
-    // Filter by exact cost
+    // Query all relevant collections and extract records
+    let allCards = [];
+    for (const collName of collectionsToQuery) {
+      try {
+        const db = mongoose.connection.db;
+        const collection = db.collection(collName);
+        
+        // Get the deck document
+        const deckDoc = await collection.findOne({});
+        
+        if (deckDoc && deckDoc.records && Array.isArray(deckDoc.records)) {
+          // Extract records and map to card format
+          const cards = deckDoc.records.map(record => ({
+            _id: record.record_id || record._id,
+            name: record.display_name || record.base_card_name,
+            nameTh: '', // ไม่มีในข้อมูลใหม่
+            faction: record.faction || record.deck_name,
+            deck_group: record.deck_name,
+            cost: parseInt(record.cost_red_gem) || 0,
+            type: 'Character', // default
+            power: parseInt(record.attack) || 0,
+            health: 0, // ไม่มีในข้อมูลใหม่
+            attack: record.attack,
+            armor: record.armor,
+            description: record.ability_text || '',
+            ability_text: record.ability_text,
+            unity_text: record.unity_text,
+            battle_style: record.battle_style,
+            image: record.image_url || '', // Map from image_url in DB
+            rarity: 'Common', // default
+            keywords: record.keywords_mechanic ? record.keywords_mechanic.join(', ') : '',
+            has_unity: record.has_unity,
+            variant_type: record.variant_type,
+            variant_label: record.variant_label,
+          }));
+          
+          allCards = allCards.concat(cards);
+        }
+      } catch (err) {
+        console.warn(`Warning: Could not query collection ${collName}:`, err.message);
+      }
+    }
+
+    // Apply filters
+    let filteredCards = allCards;
+
+    // Text search
+    if (search && search.trim()) {
+      const searchLower = search.trim().toLowerCase();
+      filteredCards = filteredCards.filter(card => 
+        (card.name && card.name.toLowerCase().includes(searchLower)) ||
+        (card.description && card.description.toLowerCase().includes(searchLower)) ||
+        (card.keywords && card.keywords.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Cost filter
     if (cost !== undefined && cost !== '' && cost !== 'all') {
-      query.cost = Number(cost);
+      filteredCards = filteredCards.filter(card => card.cost === Number(cost));
     }
 
-    // Filter by cost range
-    if (costMin !== undefined || costMax !== undefined) {
-      query.cost = {};
-      if (costMin !== undefined) query.cost.$gte = Number(costMin);
-      if (costMax !== undefined) query.cost.$lte = Number(costMax);
-    }
-
-    // Filter by type
+    // Type filter
     if (type && type !== 'all') {
-      query.type = type;
+      filteredCards = filteredCards.filter(card => card.type === type);
     }
 
-    // Filter by rarity
+    // Rarity filter
     if (rarity && rarity !== 'all') {
-      query.rarity = rarity;
+      filteredCards = filteredCards.filter(card => card.rarity === rarity);
     }
 
-    // Sorting
-    const sortOptions = {
-      name: { name: 1 },
-      cost_asc: { cost: 1 },
-      cost_desc: { cost: -1 },
-      rarity: { rarity: -1 },
-      power: { power: -1 },
-    };
-    const sortQuery = sortOptions[sort] || { name: 1 };
+    // Sort results
+    filteredCards.sort((a, b) => {
+      if (sort === 'name') return (a.name || '').localeCompare(b.name || '');
+      if (sort === 'cost_asc') return (a.cost || 0) - (b.cost || 0);
+      if (sort === 'cost_desc') return (b.cost || 0) - (a.cost || 0);
+      if (sort === 'power') return (b.power || 0) - (a.power || 0);
+      return 0;
+    });
 
-    const total = await Card.countDocuments(query);
-    const cards = await Card.find(query)
-      .sort(sortQuery)
-      .skip((Number(page) - 1) * Number(limit))
-      .limit(Number(limit));
+    // Paginate
+    const total = filteredCards.length;
+    const startIndex = (Number(page) - 1) * Number(limit);
+    const endIndex = startIndex + Number(limit);
+    const cards = filteredCards.slice(startIndex, endIndex);
 
     res.json({
       cards,
@@ -89,7 +148,14 @@ router.get('/', async (req, res) => {
 // GET /api/cards/factions - Get all unique factions
 router.get('/factions', async (req, res) => {
   try {
-    const factions = await Card.distinct('faction');
+    // Return list of deck collections as factions
+    const factions = DECK_COLLECTIONS.map(coll => {
+      // Convert collection name back to readable format
+      return coll
+        .replace(/([A-Z])/g, ' $1')
+        .trim()
+        .replace(/\s+/g, ' ');
+    });
     res.json(factions.sort());
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -99,9 +165,59 @@ router.get('/factions', async (req, res) => {
 // GET /api/cards/:id - Get single card by ID
 router.get('/:id', async (req, res) => {
   try {
-    const card = await Card.findById(req.params.id);
-    if (!card) return res.status(404).json({ message: 'Card not found' });
-    res.json(card);
+    const db = mongoose.connection.db;
+    const searchId = req.params.id;
+    
+    // Search across all collections
+    let foundCard = null;
+    
+    for (const collName of DECK_COLLECTIONS) {
+      try {
+        const collection = db.collection(collName);
+        const deckDoc = await collection.findOne({});
+        
+        if (deckDoc && deckDoc.records && Array.isArray(deckDoc.records)) {
+          // Find record by record_id
+          const record = deckDoc.records.find(r => 
+            String(r.record_id) === searchId || 
+            String(r._id) === searchId
+          );
+          
+          if (record) {
+            // Map to card format
+            foundCard = {
+              _id: record.record_id || record._id,
+              name: record.display_name || record.base_card_name,
+              nameTh: '',
+              faction: record.faction || record.deck_name,
+              deck_group: record.deck_name,
+              cost: parseInt(record.cost_red_gem) || 0,
+              type: 'Character',
+              power: parseInt(record.attack) || 0,
+              health: 0,
+              attack: record.attack,
+              armor: record.armor,
+              description: record.ability_text || '',
+              ability_text: record.ability_text,
+              unity_text: record.unity_text,
+              battle_style: record.battle_style,
+              image: record.image_url || '',
+              rarity: 'Common',
+              keywords: record.keywords_mechanic ? record.keywords_mechanic.join(', ') : '',
+              has_unity: record.has_unity,
+              variant_type: record.variant_type,
+              variant_label: record.variant_label,
+            };
+            break;
+          }
+        }
+      } catch (err) {
+        console.warn(`Warning: Error searching in ${collName}:`, err.message);
+      }
+    }
+    
+    if (!foundCard) return res.status(404).json({ message: 'Card not found' });
+    res.json(foundCard);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

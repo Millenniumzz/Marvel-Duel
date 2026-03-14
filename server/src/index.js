@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const cardRoutes = require('./routes/cards');
 const deckRoutes = require('./routes/decks');
 const metaDeckRoutes = require('./routes/metaDecks');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/cards', cardRoutes);
 app.use('/api/decks', deckRoutes);
 app.use('/api/meta-decks', metaDeckRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

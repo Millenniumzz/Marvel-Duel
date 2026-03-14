@@ -22,7 +22,7 @@ export default function CardsPage() {
     rarity: 'all',
     sort: 'name',
     page: 1,
-    limit: 20,
+    limit: 24,
   })
 
   const fetchCards = useCallback(async () => {
