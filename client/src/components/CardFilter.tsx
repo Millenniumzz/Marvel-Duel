@@ -62,7 +62,7 @@ export default function CardFilter({ filters, onChange }: CardFilterProps) {
 
   const clearAll = () => {
     setLocalSearch('')
-    onChange({ search: '', faction: 'all', cost: 'all', type: 'all', rarity: 'all', sort: 'name', page: 1, limit: 20 })
+    onChange({ search: '', faction: 'all', cost: 'all', type: 'all', rarity: 'all', sort: 'name', page: 1, limit: 24 })
   }
 
   const hasActiveFilters =

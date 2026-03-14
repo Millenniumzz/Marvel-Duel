@@ -154,4 +154,13 @@ const cardSchema = new mongoose.Schema(
 // Text index for search
 cardSchema.index({ name: 'text', nameTh: 'text', description: 'text', descriptionTh: 'text' });
 
-module.exports = mongoose.model('Card', cardSchema, 'Card');
+// Export model factory that can use different collection names
+const Card = mongoose.model('Card', cardSchema);
+
+// Helper function to get model for specific deck collection
+Card.forDeck = function(deckName) {
+  const collectionName = deckName.replace(/[^a-zA-Z0-9]/g, '');
+  return mongoose.model(`Card_${collectionName}`, cardSchema, collectionName);
+};
+
+module.exports = Card;

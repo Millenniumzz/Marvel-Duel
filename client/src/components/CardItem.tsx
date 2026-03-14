@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Zap, Shield, Swords } from 'lucide-react'
 import CardModal from './CardModal'
 import type { Card } from '../types'
+import { useCardImage } from '../hooks/useCardImage'
 
 const FACTION_COLORS: Record<string, string> = {
   Avengers: 'text-blue-400 bg-blue-900/30 border-blue-700',
@@ -50,6 +51,7 @@ interface CardItemProps {
 
 export default function CardItem({ card, onAddToDeck, deckMode = false }: CardItemProps) {
   const [showModal, setShowModal] = useState(false)
+  const { imageUrl, loading } = useCardImage(card)
   const Icon = TYPE_ICON[card.type] || Swords
   const factionColor = FACTION_COLORS[card.faction] || 'text-gray-400 bg-gray-900/30 border-gray-600'
   const rarityBorder = RARITY_BORDER[card.rarity] || 'border-gray-600'
@@ -74,9 +76,14 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
 
         {/* Card Image */}
         <div className="w-full h-36 bg-gradient-to-br from-marvel-cardHover to-black flex items-center justify-center">
-          {card.image ? (
+          {loading ? (
+            <div className="flex flex-col items-center gap-2 opacity-50">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <span className="text-xs">Loading...</span>
+            </div>
+          ) : imageUrl ? (
             <img
-              src={card.image}
+              src={imageUrl}
               alt={card.name}
               className="w-full h-full object-cover"
               onError={(e) => (e.currentTarget.style.display = 'none')}
