@@ -1,7 +1,7 @@
 import { X, Swords, Shield, Zap } from 'lucide-react'
 import { useState } from 'react'
 import type { Card } from '../types'
-import { getCardImageUrl } from '../utils/imageHelpers'
+import { useCardImage } from '../hooks/useCardImage'
 
 interface CardModalProps {
   card: Card
@@ -12,6 +12,7 @@ type Tab = 'details' | 'multiverse'
 
 export default function CardModal({ card, onClose }: CardModalProps) {
   const [activeTab, setActiveTab] = useState<Tab>('details')
+  const { imageUrl, loading } = useCardImage(card)
 
   // Parse keywords if it's a string
   const keywordsArray = typeof card.keywords === 'string' 
@@ -58,11 +59,18 @@ export default function CardModal({ card, onClose }: CardModalProps) {
             )}
 
             {/* Card Image */}
-            {card.image ? (
+            {loading ? (
+              <div className="relative max-w-md w-full aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-900 rounded-2xl flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white"></div>
+                  <span className="text-white text-lg">Loading image...</span>
+                </div>
+              </div>
+            ) : imageUrl ? (
               <div className="relative max-w-md w-full">
                 <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-700">
                   <img 
-                    src={getCardImageUrl(card)} 
+                    src={imageUrl} 
                     alt={card.name} 
                     className="w-full h-full object-cover"
                     onError={(e) => {

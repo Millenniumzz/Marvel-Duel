@@ -77,6 +77,7 @@ router.get('/', async (req, res) => {
             unity_text: record.unity_text,
             battle_style: record.battle_style,
             image: record.image_url || '', // Map from image_url in DB
+            card_number: record.card_number, // ⭐ เพิ่มบรรทัดนี้
             rarity: 'Common', // default
             keywords: record.keywords_mechanic ? record.keywords_mechanic.join(', ') : '',
             has_unity: record.has_unity,

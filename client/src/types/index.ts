@@ -28,6 +28,8 @@ export interface Card {
   rarity: Rarity
   keywords: string
   isBanned: boolean
+  // Image fields
+  card_number?: string  // NEW: Card number for automatic image lookup (e.g., "0645", "0001")
   // New fields from MongoDB
   deck_group?: string
   source_section?: string
