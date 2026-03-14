@@ -27,7 +27,7 @@ const COSTS = ['all','2', '3', '4', '5', '6']
 
 const TYPES = ['all', 'Character', 'Action', 'Equip']
 
-const RARITIES = ['all', 'Common', 'Rare', 'Epic', 'Legendary']
+const RARITIES = ['all', 'Common', 'Rare', 'Epic', 'Legendary','Multiverse']
 
 const SORTS = [
   { value: 'name', label: 'ชื่อ (A-Z)' },

@@ -11,7 +11,7 @@ export type Faction =
   | 'S.H.I.E.L.D.'
   | 'Neutral'
 
-export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary'
+export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary'| 'Multiverse'
 
 export interface Card {
   // Core identifiers
@@ -43,6 +43,9 @@ export interface Card {
   // Description & Abilities
   description: string
   descriptionTh?: string
+  description_th?: string
+  flavor_text?: string
+  flavor_text_th?: string
   ability?: string
   ability_text?: string
   sub_skill_1?: string
@@ -51,7 +54,11 @@ export interface Card {
   // Unity
   unity_text?: string
   unity_effect?: string
-  unity_member?: string | null
+  unity_member?: string | string[] | null
+  unity_effect_2?: string
+  unity_member_2?: string | string[] | null
+  unity_effect_3?: string
+  unity_member_3?: string | string[] | null
   has_unity?: boolean
   
   // Image

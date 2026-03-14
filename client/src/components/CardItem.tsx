@@ -21,6 +21,7 @@ const RARITY_BORDER: Record<string, string> = {
   Rare: 'border-blue-500',
   Epic: 'border-purple-500',
   Legendary: 'border-yellow-500',
+  Multiverse: 'border-pink-500',
 }
 
 const RARITY_GLOW: Record<string, string> = {
@@ -28,6 +29,7 @@ const RARITY_GLOW: Record<string, string> = {
   Rare: 'shadow-blue-500/20',
   Epic: 'shadow-purple-500/30',
   Legendary: 'shadow-yellow-500/40',
+  Multiverse: 'shadow-pink-500/40',
 }
 
 const RARITY_BADGE: Record<string, string> = {
@@ -35,6 +37,7 @@ const RARITY_BADGE: Record<string, string> = {
   Rare: 'bg-blue-900 text-blue-300',
   Epic: 'bg-purple-900 text-purple-300',
   Legendary: 'bg-yellow-900 text-yellow-400',
+  Multiverse: 'bg-pink-900 text-pink-300',
 }
 
 const BATTLE_STYLE_COLORS: Record<string, string> = {

@@ -71,7 +71,7 @@ const cardSchema = new mongoose.Schema(
     },
     rarity: {
       type: String,
-      enum: ['Common', 'Rare', 'Epic', 'Legendary'],
+      enum: ['Common', 'Rare', 'Epic', 'Legendary', 'Multiverse'],
       default: 'Common',
     },
     keywords: {

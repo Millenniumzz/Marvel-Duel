@@ -57,6 +57,9 @@
   .rarity-legendary {
     @apply border-yellow-500;
   }
+  .rarity-multiverse {
+    @apply border-pink-500;
+  }
 
   .rarity-badge-common {
     @apply bg-gray-700 text-gray-300;
@@ -69,5 +72,8 @@
   }
   .rarity-badge-legendary {
     @apply bg-yellow-900 text-yellow-300;
+  }
+  .rarity-badge-multiverse {
+        @apply bg-pink-900 text-pink-300;
   }
 }
