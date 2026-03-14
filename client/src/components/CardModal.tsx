@@ -3,6 +3,60 @@ import { useState } from 'react'
 import type { Card } from '../types'
 import { useCardImage } from '../hooks/useCardImage'
 
+const BATTLE_STYLE_COLORS: Record<string, string> = {
+  Attack: 'bg-red-600/20 text-red-300 border-2 border-red-500',
+  Guardian: 'bg-blue-600/20 text-blue-300 border-2 border-blue-500',
+  Support: 'bg-yellow-600/20 text-yellow-300 border-2 border-yellow-500',
+}
+
+// Keywords to highlight in ability text
+const KEYWORD_MECHANICS = [
+  'Invocation', 'Unity', 'Last Words', 'Bounty', 'Bounty Hunter', 'Triumph',
+  'Assault', 'Defeat', 'Stunned', 'Tried and True', 'Decay', 'Guard',
+  'Iron Will', 'Retaliate', 'Burst', 'Awaken', 'Pierce', 'Collection',
+  'Illusion', 'Critical Hit', 'Reinforcement', 'Assemble', 'Annihilate',
+  'Speed Strike', 'Lore', 'Special Action', 'Forerunner', 'Visionary',
+  'Cloaked', 'Puncture', 'Flanker', 'Enhance', 'unique effect', 'Teleport',
+  'Inhibited', 'Beast', 'Sacrifice', 'Maverick', 'Quest', 'Inhibition Layer',
+  'Lock-On', 'Alpha Power', 'Ranged', 'Intelligence', 'Time reversion',
+  'Inspire', 'Ongoing', 'Resurrect', 'Big Idea', 'Genius Idea', 'Triple Alliance',
+  'Magnetic Equipment', 'Magnetic Warrior', 'On Reveal', 'Miracle', 'Infinity Stones',
+  'Surge', 'Shark Treasure'
+]
+
+// Helper function to highlight keywords in text
+const highlightKeywords = (text: string) => {
+  if (!text) return null
+  
+  let processedText = text
+  const replacements: { keyword: string; placeholder: string }[] = []
+  
+  // Replace keywords with placeholders to avoid nested replacements
+  KEYWORD_MECHANICS.forEach((keyword, index) => {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'gi')
+    const placeholder = `__KEYWORD_${index}__`
+    if (regex.test(processedText)) {
+      processedText = processedText.replace(regex, placeholder)
+      replacements.push({ keyword, placeholder })
+    }
+  })
+  
+  // Split text and create elements
+  const parts = processedText.split(/(__KEYWORD_\d+__)/)
+  
+  return parts.map((part, index) => {
+    const replacement = replacements.find(r => r.placeholder === part)
+    if (replacement) {
+      return (
+        <span key={index} className="text-orange-400 font-bold">
+          {replacement.keyword}
+        </span>
+      )
+    }
+    return part
+  })
+}
+
 interface CardModalProps {
   card: Card
   onClose: () => void
@@ -18,6 +72,8 @@ export default function CardModal({ card, onClose }: CardModalProps) {
   const keywordsArray = typeof card.keywords === 'string' 
     ? card.keywords.split(',').map(k => k.trim()).filter(Boolean)
     : Array.isArray(card.keywords) ? card.keywords : []
+  
+  const battleStyleColor = card.battle_style ? BATTLE_STYLE_COLORS[card.battle_style] : null
 
   return (
     <div
@@ -40,23 +96,10 @@ export default function CardModal({ card, onClose }: CardModalProps) {
           {/* Left: Card Image */}
           <div className="md:w-1/2 bg-gradient-to-br from-gray-800 via-gray-900 to-black p-8 flex items-center justify-center relative">
             {/* Cost Badge */}
-            <div className="absolute top-4 left-4 w-14 h-14 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center shadow-lg border-2 border-red-400">
+            <div className="absolute top-4 left-1 w-14 h-14 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center shadow-lg border-2 border-red-400">
               <span className="text-3xl font-black text-white">{card.cost}</span>
             </div>
 
-            {/* Star Badge (rarity indicator) */}
-            {card.rarity && (
-              <div className="absolute top-4 right-4">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  card.rarity === 'Legendary' ? 'bg-yellow-500/20 border-2 border-yellow-400' :
-                  card.rarity === 'Epic' ? 'bg-purple-500/20 border-2 border-purple-400' :
-                  card.rarity === 'Rare' ? 'bg-blue-500/20 border-2 border-blue-400' : 
-                  'bg-gray-500/20 border-2 border-gray-400'
-                }`}>
-                  <span className="text-2xl">★</span>
-                </div>
-              </div>
-            )}
 
             {/* Card Image */}
             {loading ? (
@@ -118,83 +161,99 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-600" />
                 )}
               </button>
-              <button
-                onClick={() => setActiveTab('multiverse')}
-                className={`flex-1 px-6 py-3 font-bold transition-colors relative ${
-                  activeTab === 'multiverse' 
-                    ? 'text-white bg-red-600/20' 
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                Multiverse
-                {activeTab === 'multiverse' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-600" />
-                )}
-              </button>
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {activeTab === 'details' && (
                 <>
                   {/* Card Name */}
-                  <div className="mb-6">
-                    <h2 className="text-3xl font-black text-white mb-1">{card.name}</h2>
+                  <div>
+                    <h2 className="text-3xl font-black text-white leading-tight">{card.name}</h2>
                     {card.nameTh && card.nameTh !== card.name && (
-                      <p className="text-gray-400 text-lg">{card.nameTh}</p>
+                      <p className="text-gray-400 text-lg mt-1">{card.nameTh}</p>
                     )}
                   </div>
 
-                  {/* Keywords Badge */}
-                  {keywordsArray.length > 0 && (
-                    <div className="flex items-center gap-2 text-sm mb-4">
-                      <span className="text-gray-400 font-semibold">Keyword:</span>
-                      <div className="flex flex-wrap gap-2">
-                        {keywordsArray.map((keyword, idx) => (
-                          <span 
-                            key={idx}
-                            className="bg-blue-500/20 text-blue-300 border border-blue-500/40 px-3 py-1 rounded-md font-semibold"
-                          >
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Battle Style Badge */}
-                  {card.battle_style && (
-                    <div className="flex items-center gap-2 text-sm mb-4">
-                      <span className="text-gray-400 font-semibold">Battle Style:</span>
-                      <span className="bg-red-600/20 text-red-300 border border-red-600/40 px-3 py-1.5 rounded-md font-bold flex items-center gap-2">
-                        <Swords size={16} />
+                  {/* Battle Style Badge - More prominent */}
+                  {card.battle_style && battleStyleColor && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-gray-400 font-semibold text-sm">Battle Style:</span>
+                      <span className={`px-4 py-2 rounded-lg font-bold text-base ${battleStyleColor} flex items-center gap-2`}>
+                        <Swords size={18} />
                         {card.battle_style}
                       </span>
                     </div>
                   )}
 
-                  {/* Ability Text (Triumph) */}
-                  {card.ability_text && (
-                    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                      <div className="mb-2">
-                        <span className="text-orange-400 font-bold text-sm">Triumph:</span>
-                      </div>
-                      <p className="text-white leading-relaxed whitespace-pre-wrap">
-                        {card.ability_text}
+                  {/* Ability Text (Triumph) - More prominent */}
+                  {(card.ability || card.ability_text) && (
+                    <div className="bg-gradient-to-br from-orange-900/30 to-orange-950/30 rounded-xl p-5 border-2 border-orange-700/50 shadow-lg">
+                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">
+                        {highlightKeywords(card.ability || card.ability_text || '')}
                       </p>
                     </div>
                   )}
 
-                  {/* Unity Text */}
-                  {card.unity_text && (
-                    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                      <div className="mb-2 flex items-center gap-2">
-                        <span className="text-orange-400 font-bold text-sm">Unity:</span>
-                        {/* Unity character icons would go here if available */}
+                  {/* Sub Skill 1 */}
+                  {card.sub_skill_1 && (
+                    <div className="bg-gradient-to-br from-cyan-900/30 to-cyan-950/30 rounded-xl p-5 border-2 border-cyan-700/50 shadow-lg">
+                      <div className="mb-3 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-cyan-500 rounded-full"></div>
+                        <span className="text-cyan-400 font-black text-base tracking-wide">SUB SKILL 1</span>
                       </div>
-                      <p className="text-white leading-relaxed whitespace-pre-wrap">
-                        {card.unity_text}
+                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">
+                        {highlightKeywords(card.sub_skill_1)}
                       </p>
+                    </div>
+                  )}
+
+                  {/* Sub Skill 2 */}
+                  {card.sub_skill_2 && (
+                    <div className="bg-gradient-to-br from-teal-900/30 to-teal-950/30 rounded-xl p-5 border-2 border-teal-700/50 shadow-lg">
+                      <div className="mb-3 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-teal-500 rounded-full"></div>
+                        <span className="text-teal-400 font-black text-base tracking-wide">SUB SKILL 2</span>
+                      </div>
+                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">
+                        {highlightKeywords(card.sub_skill_2)}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Unity Effect - Only show if has_unity is true */}
+                  {card.has_unity && (card.unity_effect || card.unity_text) && (
+                    <div className="bg-gradient-to-br from-purple-900/30 to-purple-950/30 rounded-xl p-5 border-2 border-purple-700/50 shadow-lg">
+                      <div className="mb-3 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                        <span className="text-purple-400 font-black text-base tracking-wide">UNITY</span>
+                        {card.unity_member && (
+                          <span className="text-purple-300 text-sm ml-2">• {card.unity_member}</span>
+                        )}
+                      </div>
+                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">
+                        {highlightKeywords(card.unity_effect || card.unity_text || '')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Keywords */}
+                  {keywordsArray.length > 0 && (
+                    <div>
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                        <span className="text-gray-300 font-bold text-sm">KEYWORDS</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {keywordsArray.map((keyword, idx) => (
+                          <span 
+                            key={idx}
+                            className="bg-blue-600/20 text-blue-300 border border-blue-500/40 px-3 py-1.5 rounded-lg font-semibold text-sm"
+                          >
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
 

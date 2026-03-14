@@ -95,7 +95,7 @@ const cardSchema = new mongoose.Schema(
       type: String,
       default: 'Active',
     },
-    cost_red_gem: {
+    cost: {
       type: String,
       default: '',
     },

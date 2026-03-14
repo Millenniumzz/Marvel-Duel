@@ -62,27 +62,46 @@ router.get('/', async (req, res) => {
           // Extract records and map to card format
           const cards = deckDoc.records.map(record => ({
             _id: record.record_id || record._id,
+            card_id: record.card_id,
+            record_id: record.record_id,
             name: record.display_name || record.base_card_name,
+            base_card_name: record.base_card_name,
+            display_name: record.display_name,
             nameTh: '', // ไม่มีในข้อมูลใหม่
             faction: record.faction || record.deck_name,
+            deck_name: record.deck_name,
             deck_group: record.deck_name,
-            cost: parseInt(record.cost_red_gem) || 0,
-            type: 'Character', // default
+            cost: parseInt(record.cost) || 0,
+            type: 'Character', // default - could infer from data later
             power: parseInt(record.attack) || 0,
-            health: 0, // ไม่มีในข้อมูลใหม่
-            attack: record.attack,
-            armor: record.armor,
-            description: record.ability_text || '',
-            ability_text: record.ability_text,
-            unity_text: record.unity_text,
+            health: parseInt(record.armor) || 0,
+            attack: parseInt(record.attack) || 0,
+            armor: parseInt(record.armor) || 0,
+            description: record.ability || record.ability_text || '',
+            ability: record.ability,
+            ability_text: record.ability_text || record.ability,
+            sub_skill_1: record.sub_skill_1,
+            sub_skill_2: record.sub_skill_2,
+            unity_effect: record.unity_effect,
+            unity_text: record.unity_text || record.unity_effect,
+            unity_member: record.unity_member,
             battle_style: record.battle_style,
-            image: record.image_url || '', // Map from image_url in DB
-            card_number: record.card_number, // ⭐ เพิ่มบรรทัดนี้
-            rarity: 'Common', // default
+            image: record.image_url || '',
+            image_url: record.image_url,
+            card_number: record.card_number,
+            rarity: record.rarity || 'Common',
             keywords: record.keywords_mechanic ? record.keywords_mechanic.join(', ') : '',
-            has_unity: record.has_unity,
+            keywords_mechanic: record.keywords_mechanic || record.keyword_mechanic || [],
+            keywords_team: record.keywords_team || [],
+            keyword_mechanic: record.keyword_mechanic || record.keywords_mechanic || [],
+            has_unity: record.has_unity || false,
             variant_type: record.variant_type,
             variant_label: record.variant_label,
+            availability_status: record.availability_status,
+            patch_version: record.patch_version,
+            source_type: record.source_type,
+            inference_confidence: record.inference_confidence,
+            needs_manual_verification: record.needs_manual_verification,
           }));
           
           allCards = allCards.concat(cards);

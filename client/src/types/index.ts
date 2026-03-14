@@ -14,41 +14,87 @@ export type Faction =
 export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary'
 
 export interface Card {
+  // Core identifiers
   _id: string
+  card_id?: string
+  record_id?: number
+  
+  // Names
   name: string
   nameTh?: string
+  base_card_name?: string
+  display_name?: string
+  
+  // Faction & Deck
   faction: Faction
+  deck_name?: string
+  deck_group?: string
+  
+  // Card Type & Cost
   cost: number
   type: CardType
+  
+  // Stats
   power: number
   health: number
+  attack?: number
+  armor?: number
+  
+  // Description & Abilities
   description: string
   descriptionTh?: string
-  image?: string
-  rarity: Rarity
-  keywords: string
-  isBanned: boolean
-  // Image fields
-  card_number?: string  // NEW: Card number for automatic image lookup (e.g., "0645", "0001")
-  // New fields from MongoDB
-  deck_group?: string
-  source_section?: string
-  availability_status?: string
-  cost_red_gem?: string
-  attack?: string
-  armor?: string
-  battle_style?: string
+  ability?: string
   ability_text?: string
+  sub_skill_1?: string
+  sub_skill_2?: string
+  
+  // Unity
   unity_text?: string
-  has_unity?: string
+  unity_effect?: string
+  unity_member?: string | null
+  has_unity?: boolean
+  
+  // Image
+  image?: string
+  image_url?: string
+  card_number?: string  // Card number for automatic image lookup (e.g., "0645", "0001")
+  
+  // Rarity & Style
+  rarity: Rarity
+  battle_style?: string
+  
+  // Keywords
+  keywords: string | string[]
+  keywords_mechanic?: string[]
+  keywords_team?: string[]
+  keyword_mechanic?: string[]
+  
+  // Variant Info
+  variant_type?: string
+  variant_label?: string
+  
+  // Status & Meta
+  isBanned?: boolean
+  availability_status?: string
+  patch_version?: string
+  source_type?: string
+  source_section?: string
   source_url?: string
-  last_verified?: string
-  completeness?: string
-  notes?: string
+  inference_confidence?: string
+  needs_manual_verification?: boolean
+  
+  // Flags
   inferred_variant_flag?: boolean
   inferred_multiverse_flag?: boolean
+  
+  // Timestamps
   createdAt?: string
   updatedAt?: string
+  last_verified?: string
+  
+  // Other
+  completeness?: string
+  notes?: string
 }
 
 export interface DeckCard {

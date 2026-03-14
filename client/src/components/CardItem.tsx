@@ -37,6 +37,12 @@ const RARITY_BADGE: Record<string, string> = {
   Legendary: 'bg-yellow-900 text-yellow-400',
 }
 
+const BATTLE_STYLE_COLORS: Record<string, string> = {
+  Attack: 'bg-red-900/50 text-red-300 border border-red-600',
+  Guardian: 'bg-blue-900/50 text-blue-300 border border-blue-600',
+  Support: 'bg-yellow-900/50 text-yellow-300 border border-yellow-600',
+}
+
 const TYPE_ICON: Record<string, typeof Swords> = {
   Character: Swords,
   Action: Zap,
@@ -57,6 +63,14 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
   const rarityBorder = RARITY_BORDER[card.rarity] || 'border-gray-600'
   const rarityGlow = RARITY_GLOW[card.rarity] || ''
   const rarityBadge = RARITY_BADGE[card.rarity] || 'bg-gray-700 text-gray-300'
+  const battleStyleColor = card.battle_style ? BATTLE_STYLE_COLORS[card.battle_style] : null
+
+  // Parse keywords to array
+  const keywordsArray = Array.isArray(card.keywords) 
+    ? card.keywords 
+    : typeof card.keywords === 'string' 
+    ? card.keywords.split(',').map(k => k.trim()).filter(Boolean)
+    : []
 
   return (
     <>
@@ -73,6 +87,13 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
         <div className={`absolute top-2 right-2 z-10 text-xs px-2 py-0.5 rounded-full font-semibold ${rarityBadge}`}>
           {card.rarity}
         </div>
+
+        {/* Battle Style badge */}
+        {card.battle_style && battleStyleColor && (
+          <div className={`absolute top-10 right-2 z-10 text-xs px-2 py-0.5 rounded font-semibold ${battleStyleColor}`}>
+            {card.battle_style}
+          </div>
+        )}
 
         {/* Card Image */}
         <div className="w-full h-36 bg-gradient-to-br from-marvel-cardHover to-black flex items-center justify-center">
@@ -137,9 +158,9 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
           </p>
 
           {/* Keywords */}
-          {card.keywords && card.keywords.length > 0 && (
+          {keywordsArray.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {card.keywords.slice(0, 3).map((kw) => (
+              {keywordsArray.slice(0, 3).map((kw: string) => (
                 <span key={kw} className="text-xs bg-black/40 text-gray-500 px-1.5 py-0.5 rounded">
                   {kw}
                 </span>
