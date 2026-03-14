@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-marvel-dark text-white;
+    background: radial-gradient(ellipse at top, #1a0505 0%, #0D0D0D 60%);
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-marvel-dark;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-marvel-red rounded-full;
+  }
+}
+
+@layer components {
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-marvel-red/20;
+  }
+  
+  .btn-primary {
+    @apply bg-marvel-red hover:bg-marvel-darkred text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-marvel-card hover:bg-marvel-cardHover text-white font-semibold py-2 px-4 rounded-lg border border-marvel-border transition-colors duration-200;
+  }
+
+  .filter-tag {
+    @apply px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-all duration-200;
+  }
+
+  .filter-tag-active {
+    @apply bg-marvel-red text-white;
+  }
+
+  .filter-tag-inactive {
+    @apply bg-marvel-card text-gray-400 hover:bg-marvel-border hover:text-white border border-marvel-border;
+  }
+
+  .rarity-common {
+    @apply border-gray-500;
+  }
+  .rarity-rare {
+    @apply border-blue-500;
+  }
+  .rarity-epic {
+    @apply border-purple-500;
+  }
+  .rarity-legendary {
+    @apply border-yellow-500;
+  }
+
+  .rarity-badge-common {
+    @apply bg-gray-700 text-gray-300;
+  }
+  .rarity-badge-rare {
+    @apply bg-blue-900 text-blue-300;
+  }
+  .rarity-badge-epic {
+    @apply bg-purple-900 text-purple-300;
+  }
+  .rarity-badge-legendary {
+    @apply bg-yellow-900 text-yellow-300;
+  }
+}
