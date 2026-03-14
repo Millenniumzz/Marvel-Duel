@@ -1,6 +1,7 @@
 import { X, Swords, Shield, Zap } from 'lucide-react'
 import { useState } from 'react'
 import type { Card } from '../types'
+import { getCardImageUrl } from '../utils/imageHelpers'
 
 interface CardModalProps {
   card: Card
@@ -61,9 +62,13 @@ export default function CardModal({ card, onClose }: CardModalProps) {
               <div className="relative max-w-md w-full">
                 <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-700">
                   <img 
-                    src={card.image} 
+                    src={getCardImageUrl(card)} 
                     alt={card.name} 
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to placeholder if proxy fails
+                      e.currentTarget.src = '/placeholder-card.png';
+                    }}
                   />
                 </div>
                 

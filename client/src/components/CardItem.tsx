@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Zap, Shield, Swords } from 'lucide-react'
 import CardModal from './CardModal'
 import type { Card } from '../types'
+import { getCardImageUrl } from '../utils/imageHelpers'
 
 const FACTION_COLORS: Record<string, string> = {
   Avengers: 'text-blue-400 bg-blue-900/30 border-blue-700',
@@ -76,7 +77,7 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
         <div className="w-full h-36 bg-gradient-to-br from-marvel-cardHover to-black flex items-center justify-center">
           {card.image ? (
             <img
-              src={card.image}
+              src={getCardImageUrl(card)}
               alt={card.name}
               className="w-full h-full object-cover"
               onError={(e) => (e.currentTarget.style.display = 'none')}
