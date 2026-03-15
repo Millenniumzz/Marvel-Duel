@@ -25,17 +25,13 @@ const FACTIONS = [
 
 const COSTS = ['all','2', '3', '4', '5', '6']
 
-const TYPES = ['all', 'Character', 'Action', 'Equip']
+const TYPES = ['all', 'Character', 'Equipment', 'Pow', 'Tactics Card']
+
+const BATTLE_STYLES = ['all', 'Attack', 'Guardian', 'Support', 'Pow', 'Tactics Card']
 
 const RARITIES = ['all', 'Common', 'Rare', 'Epic', 'Legendary','Multiverse']
 
-const SORTS = [
-  { value: 'name', label: 'ชื่อ (A-Z)' },
-  { value: 'cost_asc', label: 'ต้นทุน (น้อย → มาก)' },
-  { value: 'cost_desc', label: 'ต้นทุน (มาก → น้อย)' },
-  { value: 'rarity', label: 'ความหายาก' },
-  { value: 'power', label: 'พลังสูงสุด' },
-]
+
 
 interface CardFilterProps {
   filters: CardFilters
@@ -62,7 +58,7 @@ export default function CardFilter({ filters, onChange }: CardFilterProps) {
 
   const clearAll = () => {
     setLocalSearch('')
-    onChange({ search: '', faction: 'all', cost: 'all', type: 'all', rarity: 'all', sort: 'name', page: 1, limit: 24 })
+    onChange({ search: '', faction: 'all', cost: 'all', type: 'all', rarity: 'all', battle_style: 'all', sort: 'name', page: 1, limit: 24 })
   }
 
   const hasActiveFilters =
@@ -70,7 +66,8 @@ export default function CardFilter({ filters, onChange }: CardFilterProps) {
     filters.faction !== 'all' ||
     filters.cost !== 'all' ||
     filters.type !== 'all' ||
-    filters.rarity !== 'all'
+    filters.rarity !== 'all' ||
+    filters.battle_style !== 'all'
 
   return (
     <div className="space-y-4">
@@ -181,42 +178,57 @@ export default function CardFilter({ filters, onChange }: CardFilterProps) {
             </div>
           </div>
 
-          {/* Type & Rarity row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Type */}
-            <div>
-              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">ประเภทการ์ด</p>
-              <div className="flex flex-wrap gap-1.5">
-                {TYPES.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => handleChange('type', t)}
-                    className={`filter-tag ${
-                      filters.type === t ? 'filter-tag-active' : 'filter-tag-inactive'
-                    }`}
-                  >
-                    {t === 'all' ? 'ทั้งหมด' : t}
-                  </button>
-                ))}
-              </div>
+          {/* Type */}
+          <div>
+            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">ประเภทการ์ด (Type)</p>
+            <div className="flex flex-wrap gap-1.5">
+              {TYPES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => handleChange('type', t)}
+                  className={`filter-tag ${
+                    filters.type === t ? 'filter-tag-active' : 'filter-tag-inactive'
+                  }`}
+                >
+                  {t === 'all' ? 'ทั้งหมด' : t}
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* Rarity */}
-            <div>
-              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">ความหายาก</p>
-              <div className="flex flex-wrap gap-1.5">
-                {RARITIES.map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => handleChange('rarity', r)}
-                    className={`filter-tag ${
-                      filters.rarity === r ? 'filter-tag-active' : 'filter-tag-inactive'
-                    }`}
-                  >
-                    {r === 'all' ? 'ทั้งหมด' : r}
-                  </button>
-                ))}
-              </div>
+          {/* Battle Style */}
+          <div>
+            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">รูปแบบการต่อสู้ (Battle Style)</p>
+            <div className="flex flex-wrap gap-1.5">
+              {BATTLE_STYLES.map((bs) => (
+                <button
+                  key={bs}
+                  onClick={() => handleChange('battle_style', bs)}
+                  className={`filter-tag ${
+                    filters.battle_style === bs ? 'filter-tag-active' : 'filter-tag-inactive'
+                  }`}
+                >
+                  {bs === 'all' ? 'ทั้งหมด' : bs}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Rarity */}
+          <div>
+            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">ความหายาก (Rarity)</p>
+            <div className="flex flex-wrap gap-1.5">
+              {RARITIES.map((r) => (
+                <button
+                  key={r}
+                  onClick={() => handleChange('rarity', r)}
+                  className={`filter-tag ${
+                    filters.rarity === r ? 'filter-tag-active' : 'filter-tag-inactive'
+                  }`}
+                >
+                  {r === 'all' ? 'ทั้งหมด' : r}
+                </button>
+              ))}
             </div>
           </div>
         </div>

@@ -20,6 +20,7 @@ export default function CardsPage() {
     cost: 'all',
     type: 'all',
     rarity: 'all',
+    battle_style: 'all',
     sort: 'name',
     page: 1,
     limit: 24,
@@ -33,8 +34,11 @@ export default function CardsPage() {
       if (params.cost === 'all') delete params.cost
       if (params.type === 'all') delete params.type
       if (params.rarity === 'all') delete params.rarity
+      if (params.battle_style === 'all') delete params.battle_style
 
       const res = await cardsApi.getCards(params)
+      
+      // Server already sorts the cards, no need to sort again
       setCards(res.data.cards)
       setTotal(res.data.total)
       setTotalPages(res.data.totalPages)
@@ -188,8 +192,8 @@ function CardListItem({ card }: CardListItemProps) {
         </div>
         {card.type === 'Character' && (
           <div className="flex items-center gap-3 text-sm flex-shrink-0">
-            <span className="text-red-400 font-bold">{card.power}⚔</span>
-            <span className="text-green-400 font-bold">{card.health}🛡</span>
+            <span className="text-red-400 font-bold">{card.attack}⚔</span>
+            <span className="text-green-400 font-bold">{card.armor}🛡</span>
           </div>
         )}
       </div>

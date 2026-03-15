@@ -42,20 +42,12 @@ const cardSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
-      max: 10,
+      max: 6,
     },
     type: {
       type: String,
-      enum: ['Character', 'Action', 'Equip'],
+      enum: ['Character', 'Equipment', 'Pow', 'Tactics Card'],
       required: true,
-    },
-    power: {
-      type: Number,
-      default: 0,
-    },
-    health: {
-      type: Number,
-      default: 0,
     },
     description: {
       type: String,
@@ -95,20 +87,17 @@ const cardSchema = new mongoose.Schema(
       type: String,
       default: 'Active',
     },
-    cost: {
-      type: String,
-      default: '',
-    },
     attack: {
-      type: String,
-      default: '',
+      type: Number,
+      default: 0,
     },
     armor: {
-      type: String,
-      default: '',
+      type: Number,
+      default: 0,
     },
     battle_style: {
       type: String,
+      enum: ['Attack', 'Guardian', 'Support', 'Pow', 'Tactics Card', ''],
       default: '',
     },
     ability_text: {

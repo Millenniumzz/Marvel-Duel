@@ -23,6 +23,77 @@ const DECK_COLLECTIONS = [
   'Collaboration',
 ];
 
+// Helper function to get card type for sorting
+const getCardTypeForSorting = (card) => {
+  return card.type;
+};
+
+// Helper function to get type sort order
+const getTypeSortOrder = (type) => {
+  const order = {
+    'Character': 1,
+    'Equipment': 2,
+    'Pow': 3,
+    'Tactics Card': 4,
+  };
+  return order[type] || 999;
+};
+
+// Helper function to get rarity sort order
+const getRaritySortOrder = (rarity) => {
+  const order = {
+    'Legendary': 1,
+    'Epic': 2,
+    'Rare': 3,
+    'Common': 4,
+    'Multiverse': 5,
+  };
+  return order[rarity] || 999;
+};
+
+// Helper function to get card ID for sorting
+const getCardIdForSorting = (card) => {
+  // Try card_number first
+  if (card.card_number) {
+    const numStr = card.card_number.replace(/\D/g, '');
+    const num = parseInt(numStr, 10);
+    if (!isNaN(num)) return num;
+  }
+  
+  // Try record_id
+  if (card.record_id) {
+    return card.record_id;
+  }
+  
+  // Try _id if it's numeric
+  if (card._id) {
+    const num = parseInt(card._id, 10);
+    if (!isNaN(num)) return num;
+  }
+  
+  return 999999;
+};
+
+// Standard card sorting comparator
+const compareCards = (a, b) => {
+  // 1. Sort by cost (ascending)
+  const costDiff = (a.cost || 0) - (b.cost || 0);
+  if (costDiff !== 0) return costDiff;
+  
+  // 2. Sort by type order
+  const typeA = getCardTypeForSorting(a);
+  const typeB = getCardTypeForSorting(b);
+  const typeOrderDiff = getTypeSortOrder(typeA) - getTypeSortOrder(typeB);
+  if (typeOrderDiff !== 0) return typeOrderDiff;
+  
+  // 3. Sort by rarity
+  const rarityOrderDiff = getRaritySortOrder(a.rarity) - getRaritySortOrder(b.rarity);
+  if (rarityOrderDiff !== 0) return rarityOrderDiff;
+  
+  // 4. Sort by card ID
+  return getCardIdForSorting(a) - getCardIdForSorting(b);
+};
+
 // GET /api/cards - Get all cards with search & filter
 router.get('/', async (req, res) => {
   try {
@@ -34,6 +105,7 @@ router.get('/', async (req, res) => {
       costMax,
       type,
       rarity,
+      battle_style,
       sort = 'name',
       page = 1,
       limit = 24,
@@ -72,7 +144,7 @@ router.get('/', async (req, res) => {
             deck_name: record.deck_name,
             deck_group: record.deck_name,
             cost: parseInt(record.cost) || 0,
-            type: 'Character', // default - could infer from data later
+            type: record.type || 'Character', // Get from record.type
             power: parseInt(record.attack) || 0,
             health: parseInt(record.armor) || 0,
             attack: parseInt(record.attack) || 0,
@@ -139,19 +211,18 @@ router.get('/', async (req, res) => {
       filteredCards = filteredCards.filter(card => card.type === type);
     }
 
+    // Battle Style filter
+    if (battle_style && battle_style !== 'all') {
+      filteredCards = filteredCards.filter(card => card.battle_style === battle_style);
+    }
+
     // Rarity filter
     if (rarity && rarity !== 'all') {
       filteredCards = filteredCards.filter(card => card.rarity === rarity);
     }
 
-    // Sort results
-    filteredCards.sort((a, b) => {
-      if (sort === 'name') return (a.name || '').localeCompare(b.name || '');
-      if (sort === 'cost_asc') return (a.cost || 0) - (b.cost || 0);
-      if (sort === 'cost_desc') return (b.cost || 0) - (a.cost || 0);
-      if (sort === 'power') return (b.power || 0) - (a.power || 0);
-      return 0;
-    });
+    // Sort results using standard sorting (Cost -> Type -> Rarity -> Card ID)
+    filteredCards.sort(compareCards);
 
     // Paginate
     const total = filteredCards.length;
@@ -216,10 +287,10 @@ router.get('/:id', async (req, res) => {
               nameTh: '',
               faction: record.faction || record.deck_name,
               deck_group: record.deck_name,
-              cost: parseInt(record.cost_red_gem) || 0,
-              type: 'Character',
+              cost: parseInt(record.cost) || 0,
+              type: record.type || 'Character',
               power: parseInt(record.attack) || 0,
-              health: 0,
+              health: parseInt(record.armor) || 0,
               attack: record.attack,
               armor: record.armor,
               description: record.ability_text || '',
@@ -227,7 +298,7 @@ router.get('/:id', async (req, res) => {
               unity_text: record.unity_text,
               battle_style: record.battle_style,
               image: record.image_url || '',
-              rarity: 'Common',
+              rarity: record.rarity || 'Common',
               keywords: record.keywords_mechanic ? record.keywords_mechanic.join(', ') : '',
               has_unity: record.has_unity,
               variant_type: record.variant_type,

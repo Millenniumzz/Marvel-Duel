@@ -1,4 +1,4 @@
-export type CardType = 'Character' | 'Action' | 'Equip'
+export type CardType = 'Character' | 'Equipment' | 'Pow' | 'Tactics Card'
 
 export type Faction =
   | 'Avengers'
@@ -35,8 +35,6 @@ export interface Card {
   type: CardType
   
   // Stats
-  power: number
-  health: number
   attack?: number
   armor?: number
   
@@ -152,6 +150,7 @@ export interface CardFilters {
   cost: string
   type: string
   rarity: string
+  battle_style: string
   sort: string
   page: number
   limit: number
