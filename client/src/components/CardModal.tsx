@@ -1,8 +1,8 @@
-import {X} from 'lucide-react'
+import {X, Swords, Shield} from 'lucide-react'
 import { useState } from 'react'
 import type { Card } from '../types'
 import { useCardImage } from '../hooks/useCardImage'
-import { TYPE_ICON } from './CardItem'
+import { BATTLE_STYLE_ICONS } from '../constants/icons'
 
 const BATTLE_STYLE_COLORS: Record<string, string> = {
   Attack: 'bg-red-600/20 text-red-300 border-2 border-red-500',
@@ -154,8 +154,7 @@ export default function CardModal({ card, onClose }: CardModalProps) {
   // Get display type based on card type and battle_style
   const displayType = getDisplayType(card)
   const battleStyle = getBattleStyle(card)
-  const Icon = TYPE_ICON[displayType]
-  const IconBS = TYPE_ICON[battleStyle]
+  const IconBS = BATTLE_STYLE_ICONS[battleStyle] || Shield
 
   // Parse keywords if it's a string
   const keywordsArray = typeof card.keywords === 'string' 
@@ -217,14 +216,14 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                 </div>
                 
                 {/* Attack/Armor badges at bottom */}
-                {displayType &&(
+                {displayType === 'Character' && (
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
                     <div className="bg-red-600/90 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg border-2 border-red-400">
-                      <IconBS size={20} className="text-white" />
+                      <Swords size={20} className="text-white" />
                       <span className="text-2xl font-black text-white">{card.attack || 0}</span>
                     </div>
                     <div className="bg-blue-600/90 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg border-2 border-blue-400">
-                      <IconBS size={20} className="text-white" />
+                      <Shield size={20} className="text-white" />
                       <span className="text-2xl font-black text-white">{card.armor || 0}</span>
                     </div>
                   </div>
@@ -280,7 +279,7 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                     <div className="flex items-center gap-3">
                       <span className="text-gray-400 font-semibold text-sm">Battle Style:</span>
                       <span className={`px-4 py-2 rounded-lg font-bold text-base ${battleStyleColor} flex items-center gap-2`}>
-                        <Icon size={18} />
+                        <IconBS size={18} />
                         {card.battle_style}
                       </span>
                     </div>

@@ -27,7 +27,7 @@ const COSTS = ['all','2', '3', '4', '5', '6']
 
 const TYPES = ['all', 'Character', 'Equipment', 'Pow', 'Tactics Card']
 
-const BATTLE_STYLES = ['all', 'Attack', 'Guardian', 'Support', 'Pow', 'Tactics Card']
+const BATTLE_STYLES = ['all', 'Attack', 'Guardian', 'Support']
 
 const RARITIES = ['all', 'Common', 'Rare', 'Epic', 'Legendary','Multiverse']
 
