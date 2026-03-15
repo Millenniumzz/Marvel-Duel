@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Zap, Shield, Swords } from 'lucide-react'
+import { Swords, Shield } from 'lucide-react'
 import CardModal from './CardModal'
 import type { Card } from '../types'
 import { useCardImage } from '../hooks/useCardImage'
+import { BATTLE_STYLE_ICONS, TYPE_ICONS } from '../constants/icons'
 
 const FACTION_COLORS: Record<string, string> = {
   Avengers: 'text-blue-400 bg-blue-900/30 border-blue-700',
@@ -44,12 +45,13 @@ const BATTLE_STYLE_COLORS: Record<string, string> = {
   Attack: 'bg-red-900/50 text-red-300 border border-red-600',
   Guardian: 'bg-blue-900/50 text-blue-300 border border-blue-600',
   Support: 'bg-yellow-900/50 text-yellow-300 border border-yellow-600',
+  Pow: 'bg-purple-900/50 text-purple-300 border border-purple-600',
+  'Tactics Card': 'bg-green-900/50 text-green-300 border border-green-600',
 }
 
-const TYPE_ICON: Record<string, typeof Swords> = {
-  Character: Swords,
-  Action: Zap,
-  Equip: Shield,
+// Helper function to get display type
+const getDisplayType = (card: Card): string => {
+  return card.type
 }
 
 interface CardItemProps {
@@ -61,7 +63,11 @@ interface CardItemProps {
 export default function CardItem({ card, onAddToDeck, deckMode = false }: CardItemProps) {
   const [showModal, setShowModal] = useState(false)
   const { imageUrl, loading } = useCardImage(card)
-  const Icon = TYPE_ICON[card.type] || Swords
+  
+  // Get display type based on battle_style
+  const displayType = getDisplayType(card)
+  const Icon = TYPE_ICONS[displayType] || Swords
+  const BattleStyleIcon = card.battle_style ? BATTLE_STYLE_ICONS[card.battle_style] : null
   const factionColor = FACTION_COLORS[card.faction] || 'text-gray-400 bg-gray-900/30 border-gray-600'
   const rarityBorder = RARITY_BORDER[card.rarity] || 'border-gray-600'
   const rarityGlow = RARITY_GLOW[card.rarity] || ''
@@ -92,14 +98,15 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
         </div>
 
         {/* Battle Style badge */}
-        {card.battle_style && battleStyleColor && (
-          <div className={`absolute top-10 right-2 z-10 text-xs px-2 py-0.5 rounded font-semibold ${battleStyleColor}`}>
+        {card.battle_style && battleStyleColor && BattleStyleIcon && (
+          <div className={`absolute top-10 right-2 z-10 text-xs px-2 py-0.5 rounded font-semibold ${battleStyleColor} flex items-center gap-1`}>
+            <BattleStyleIcon size={12} />
             {card.battle_style}
           </div>
         )}
 
         {/* Card Image */}
-        <div className="w-full h-36 bg-gradient-to-br from-marvel-cardHover to-black flex items-center justify-center">
+        <div className="w-full h-48 bg-gradient-to-br from-marvel-cardHover to-black flex items-center justify-center">
           {loading ? (
             <div className="flex flex-col items-center gap-2 opacity-50">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -109,13 +116,13 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
             <img
               src={imageUrl}
               alt={card.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               onError={(e) => (e.currentTarget.style.display = 'none')}
             />
           ) : (
             <div className="flex flex-col items-center gap-2 opacity-30">
               <Icon size={40} />
-              <span className="text-xs">{card.type}</span>
+              <span className="text-xs">{displayType}</span>
             </div>
           )}
         </div>
@@ -134,7 +141,7 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
           <div className="flex items-center gap-1 flex-wrap">
             <span className="flex items-center gap-1 text-xs text-gray-400 bg-black/30 rounded px-1.5 py-0.5">
               <Icon size={10} />
-              {card.type}
+              {displayType}
             </span>
             <span className={`text-xs px-1.5 py-0.5 rounded border ${factionColor}`}>
               {card.faction}
@@ -142,15 +149,15 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
           </div>
 
           {/* Stats */}
-          {card.type === 'Character' && (
+          {displayType === 'Character' && (
             <div className="flex items-center gap-3 text-sm">
               <span className="flex items-center gap-1 text-red-400 font-bold">
                 <Swords size={12} />
-                {card.power}
+                {card.attack}
               </span>
               <span className="flex items-center gap-1 text-green-400 font-bold">
                 <Shield size={12} />
-                {card.health}
+                {card.armor}
               </span>
             </div>
           )}

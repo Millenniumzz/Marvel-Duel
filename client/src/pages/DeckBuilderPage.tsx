@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import toast from 'react-hot-toast'
 import { X, Save, Trash2, Plus, Minus, BookOpen, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Card, CardFilters, Deck, DeckCard } from '../types'
+import { compareCards } from '../utils/cardSorting'
 
 const MAX_DECK_SIZE = 30
 const MAX_COPIES = 3
@@ -26,6 +27,7 @@ export default function DeckBuilderPage() {
     cost: 'all',
     type: 'all',
     rarity: 'all',
+    battle_style: 'all',
     sort: 'cost_asc',
     page: 1,
     limit: 30,
@@ -39,8 +41,11 @@ export default function DeckBuilderPage() {
       if (params.cost === 'all') delete params.cost
       if (params.type === 'all') delete params.type
       if (params.rarity === 'all') delete params.rarity
+      if (params.battle_style === 'all') delete params.battle_style
 
       const res = await cardsApi.getCards(params)
+      
+      // Server already sorts the cards, no need to sort again
       setCards(res.data.cards)
     } catch (err) {
       console.error(err)
@@ -306,8 +311,8 @@ export default function DeckBuilderPage() {
                   <span className="text-xs">กดปุ่ม "+ เพิ่มลงเดค" เพื่อเพิ่มการ์ด</span>
                 </p>
               ) : (
-                deck
-                  .sort((a, b) => a.card.cost - b.card.cost)
+                [...deck]
+                  .sort((a, b) => compareCards(a.card, b.card))
                   .map(({ card, quantity }) => (
                     <div
                       key={card._id}

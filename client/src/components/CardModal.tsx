@@ -1,12 +1,23 @@
-import { X, Swords, Shield, Zap } from 'lucide-react'
+import {X, Swords, Shield} from 'lucide-react'
 import { useState } from 'react'
 import type { Card } from '../types'
 import { useCardImage } from '../hooks/useCardImage'
+import { BATTLE_STYLE_ICONS } from '../constants/icons'
 
 const BATTLE_STYLE_COLORS: Record<string, string> = {
   Attack: 'bg-red-600/20 text-red-300 border-2 border-red-500',
   Guardian: 'bg-blue-600/20 text-blue-300 border-2 border-blue-500',
   Support: 'bg-yellow-600/20 text-yellow-300 border-2 border-yellow-500',
+  Pow: 'bg-purple-600/20 text-purple-300 border-2 border-purple-500',
+  'Tactics Card': 'bg-green-600/20 text-green-300 border-2 border-green-500',
+}
+
+const TYPE_COLORS: Record<string, string> = {
+  Character: 'bg-red-500/20 text-red-300 border border-red-500/50',
+  Equipment: 'bg-blue-500/20 text-blue-300 border border-blue-500/50',
+  Pow: 'bg-purple-500/20 text-purple-300 border border-purple-500/50',
+  'Tactics Card': 'bg-green-500/20 text-green-300 border border-green-500/50',
+  Action: 'bg-green-500/20 text-green-300 border border-green-500/50',
 }
 
 // Keywords to highlight in ability text (yellow)
@@ -40,8 +51,11 @@ const BATTLE_STYLE_KEYWORDS = [
   { keyword: 'Tactics Card', color: 'text-green-400' },
   { keyword: 'Attack', color: 'text-red-400' },
   { keyword: 'Guardian', color: 'text-blue-400' },
-  { keyword: 'Support', color: 'text-yellow-400' }
+  { keyword: 'Support', color: 'text-yellow-400' },
+  { keyword: 'Pow', color: 'text-purple-400' }
 ]
+
+
 
 // Helper function to highlight keywords in text
 const highlightKeywords = (text: string) => {
@@ -117,6 +131,15 @@ const highlightKeywords = (text: string) => {
   )
 }
 
+// Helper function to get display type
+const getDisplayType = (card: Card): string => {
+  return card.type
+}
+
+const getBattleStyle = (card: Card): string => {
+  return card.battle_style || ''
+}
+
 interface CardModalProps {
   card: Card
   onClose: () => void
@@ -127,6 +150,11 @@ type Tab = 'details' | 'multiverse'
 export default function CardModal({ card, onClose }: CardModalProps) {
   const [activeTab, setActiveTab] = useState<Tab>('details')
   const { imageUrl, loading } = useCardImage(card)
+
+  // Get display type based on card type and battle_style
+  const displayType = getDisplayType(card)
+  const battleStyle = getBattleStyle(card)
+  const IconBS = BATTLE_STYLE_ICONS[battleStyle] || Shield
 
   // Parse keywords if it's a string
   const keywordsArray = typeof card.keywords === 'string' 
@@ -179,7 +207,7 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                   <img 
                     src={imageUrl} 
                     alt={card.name} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-gradient-to-br from-gray-800 to-black"
                     onError={(e) => {
                       // Fallback to placeholder if proxy fails
                       e.currentTarget.src = '/placeholder-card.png';
@@ -188,11 +216,11 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                 </div>
                 
                 {/* Attack/Armor badges at bottom */}
-                {card.type === 'Character' && (
+                {displayType === 'Character' && (
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
                     <div className="bg-red-600/90 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg border-2 border-red-400">
                       <Swords size={20} className="text-white" />
-                      <span className="text-2xl font-black text-white">{card.attack || card.power || 0}</span>
+                      <span className="text-2xl font-black text-white">{card.attack || 0}</span>
                     </div>
                     <div className="bg-blue-600/90 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg border-2 border-blue-400">
                       <Shield size={20} className="text-white" />
@@ -251,7 +279,7 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                     <div className="flex items-center gap-3">
                       <span className="text-gray-400 font-semibold text-sm">Battle Style:</span>
                       <span className={`px-4 py-2 rounded-lg font-bold text-base ${battleStyleColor} flex items-center gap-2`}>
-                        <Swords size={18} />
+                        <IconBS size={18} />
                         {card.battle_style}
                       </span>
                     </div>
@@ -439,22 +467,15 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                         {card.deck_group}
                       </span>
                     )}
-                    {card.type && (
-                      <span className="bg-gray-700/50 text-gray-300 border border-gray-600 px-3 py-1.5 rounded-md text-sm">
-                        {card.type}
+                    {displayType &&(
+                      <span className={`px-3 py-1.5 rounded-md text-sm font-semibold ${
+                        TYPE_COLORS[displayType] || 'bg-gray-700/50 text-gray-300 border border-gray-600'
+                      }`}>
+                        {displayType}
                       </span>
                     )}
                   </div>
                 </>
-              )}
-
-              {activeTab === 'multiverse' && (
-                <div className="text-center py-12">
-                  <p className="text-gray-400 text-lg mb-4">🌌 Multiverse Variants</p>
-                  <p className="text-gray-500 text-sm">
-                    Coming soon... This section will show different versions of this card.
-                  </p>
-                </div>
               )}
             </div>
           </div>
