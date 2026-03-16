@@ -72,7 +72,6 @@ export interface Card {
   keywords: string | string[]
   keywords_mechanic?: string[]
   keywords_team?: string[]
-  keyword_mechanic?: string[]
   
   // Variant Info
   variant_type?: string
