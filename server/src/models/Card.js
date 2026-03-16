@@ -61,6 +61,11 @@ const cardSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    //card_number is number of picture card of api 
+    card_number: {
+      type: String,
+      default: '',
+    },
     rarity: {
       type: String,
       enum: ['Common', 'Rare', 'Epic', 'Legendary', 'Multiverse'],
@@ -69,6 +74,10 @@ const cardSchema = new mongoose.Schema(
     keywords: {
       type: String,
       default: '',
+    },
+    keywords_mechanic: {
+      type: [String],
+      default: [],
     },
     isBanned: {
       type: Boolean,
@@ -100,13 +109,49 @@ const cardSchema = new mongoose.Schema(
       enum: ['Attack', 'Guardian', 'Support', 'Pow', 'Tactics Card', ''],
       default: '',
     },
+    ability: {
+      type: String,
+      default: '',
+    },
     ability_text: {
+      type: String,
+      default: '',
+    },
+    sub_skill_1: {
+      type: String,
+      default: '',
+    },
+    sub_skill_2: {
       type: String,
       default: '',
     },
     unity_text: {
       type: String,
       default: '',
+    },
+    unity_effect: {
+      type: String,
+      default: '',
+    },
+    unity_member: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+    unity_effect_2: {
+      type: String,
+      default: '',
+    },
+    unity_member_2: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+    unity_effect_3: {
+      type: String,
+      default: '',
+    },
+    unity_member_3: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
     has_unity: {
       type: String,
@@ -136,8 +181,13 @@ const cardSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Records array for card variants/versions
+    records: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: [],
+    },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 // Text index for search

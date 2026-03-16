@@ -1,8 +1,9 @@
-import {X, Swords, Shield} from 'lucide-react'
+import { X, Swords, Shield } from 'lucide-react'
 import { useState } from 'react'
 import type { Card } from '../types'
 import { useCardImage } from '../hooks/useCardImage'
 import { BATTLE_STYLE_ICONS } from '../constants/icons'
+import { highlightKeywords } from '../utils/textHighlighter'
 
 const BATTLE_STYLE_COLORS: Record<string, string> = {
   Attack: 'bg-red-600/20 text-red-300 border-2 border-red-500',
@@ -18,117 +19,6 @@ const TYPE_COLORS: Record<string, string> = {
   Pow: 'bg-purple-500/20 text-purple-300 border border-purple-500/50',
   'Tactics Card': 'bg-green-500/20 text-green-300 border border-green-500/50',
   Action: 'bg-green-500/20 text-green-300 border border-green-500/50',
-}
-
-// Keywords to highlight in ability text (yellow)
-const KEYWORD_MECHANICS = [
-  'Invocation', 'Unity', 'Last Words', 'Bounty', 'Bounty Hunter', 'Triumph',
-  'Assault', 'Defeat', 'Stunned', 'Tried and True', 'Decay', 'Guard',
-  'Iron Will', 'Retaliate', 'Burst', 'Awaken', 'Pierce', 'Collection',
-  'Illusion', 'Critical Hit', 'Reinforcement', 'Assemble', 'Annihilate',
-  'Speed Strike', 'Lore', 'Special Action', 'Forerunner', 'Visionary',
-  'Cloaked', 'Puncture', 'Flanker', 'Enhance', 'unique effect', 'Teleport',
-  'Inhibited', 'Beast', 'Sacrifice', 'Maverick', 'Quest', 'Inhibition Layer',
-  'Lock-On', 'Alpha Power', 'Ranged', 'Intelligence', 'Time reversion',
-  'Inspire', 'Ongoing', 'Resurrect', 'Big Idea', 'Genius Idea', 'Triple Alliance',
-  'Magnetic Equipment', 'Magnetic Warrior', 'On Reveal', 'Miracle', 'Infinity Stones',
-  'Surge', 'Shark Treasure','United Front',
-  // Special Character names
-  'Groot Character', 'Thor Character', 'Frost Character', 'Spider-Man Character',
-  'Vishanti Character', 'Scarlet Witch Character'
-]
-
-// Faction names to highlight in ability text (blue)
-const FACTION_KEYWORDS = [
-  'GotG', 'Asgardian', 'Intergalactic war', 'Stark Industries', 'Spider-Verse',
-  'Marvel Knight', 'Agents', 'Mystic', 'Dark Dimension', 'Eternals',
-  'X-Men', 'Brotherhood', 'Deadpool Corps', 'Avengers', 'S.H.I.E.L.D',
-  'Hydra', 'Black Order', 'WotS', 'Fantastic Four'
-]
-
-// Battle Style keywords to highlight (separate colors)
-const BATTLE_STYLE_KEYWORDS = [
-  { keyword: 'Tactics Card', color: 'text-green-400' },
-  { keyword: 'Attack', color: 'text-red-400' },
-  { keyword: 'Guardian', color: 'text-blue-400' },
-  { keyword: 'Support', color: 'text-yellow-400' },
-  { keyword: 'Pow', color: 'text-purple-400' }
-]
-
-
-
-// Helper function to highlight keywords in text
-const highlightKeywords = (text: string) => {
-  if (!text) return null
-  
-  let processedText = text
-  const replacements: { keyword: string; placeholder: string; originalMatch: string; colorClass: string }[] = []
-  let placeholderIndex = 0
-  
-  // Sort all keywords by length (longest first) to avoid partial matches
-  const allKeywords = [
-    ...KEYWORD_MECHANICS.map(k => ({ keyword: k, colorClass: 'text-yellow-400 font-bold', useWordBoundary: true })),
-    ...FACTION_KEYWORDS.map(k => ({ keyword: k, colorClass: 'text-cyan-400 font-bold', useWordBoundary: false })),
-    ...BATTLE_STYLE_KEYWORDS.map(k => ({ keyword: k.keyword, colorClass: `${k.color} font-bold`, useWordBoundary: true }))
-  ].sort((a, b) => b.keyword.length - a.keyword.length)
-  
-  // Replace keywords with placeholders
-  allKeywords.forEach(({ keyword, colorClass, useWordBoundary }) => {
-    // For special character names, create variations
-    const isSpecialChar = keyword.includes(' Character')
-    const patterns = isSpecialChar 
-      ? [keyword + 's', keyword] // Try plural first, then singular
-      : [keyword]
-    
-    patterns.forEach(pattern => {
-      // Case-insensitive global replace with optional word boundary
-      const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const regexPattern = useWordBoundary ? `\\b${escapedPattern}\\b` : escapedPattern
-      const regex = new RegExp(regexPattern, 'gi')
-      
-      let match
-      while ((match = regex.exec(processedText)) !== null) {
-        const placeholder = `__KW${placeholderIndex}__`
-        const matchedText = match[0]
-        
-        // Replace this occurrence
-        processedText = processedText.substring(0, match.index) + 
-                       placeholder + 
-                       processedText.substring(match.index + matchedText.length)
-        
-        replacements.push({ 
-          keyword: matchedText, 
-          placeholder, 
-          originalMatch: matchedText,
-          colorClass
-        })
-        
-        placeholderIndex++
-        
-        // Reset regex after replacement
-        regex.lastIndex = 0
-      }
-    })
-  })
-  
-  // Split text and create elements
-  const parts = processedText.split(/(__KW\d+__)/)
-  
-  return (
-    <>
-      {parts.map((part, index) => {
-        const replacement = replacements.find(r => r.placeholder === part)
-        if (replacement) {
-          return (
-            <span key={index} className={replacement.colorClass}>
-              {replacement.keyword}
-            </span>
-          )
-        }
-        return <span key={index}>{part}</span>
-      })}
-    </>
-  )
 }
 
 // Helper function to get display type

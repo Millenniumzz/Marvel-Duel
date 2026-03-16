@@ -1,36 +1,51 @@
-# ??? Database Scripts
+# Database Scripts
 
-## ? Active Scripts
+## Active Scripts
 
-### `updateImages.js` - ÍÑ¾à´µÃÙ»¡ÒÃì´
+### `extractKeywords.js` - Extract and Update Keywords
+Automatically extracts mechanic keywords from card ability text and updates the `keywords_mechanic` field in the database.
+
+**Usage:**
 ```bash
-node scripts/updateImages.js              # ¨Ò¡ code
-node scripts/updateImages.js cards.json   # ¨Ò¡ JSON
+node scripts/extractKeywords.js
 ```
 
-### `upsertCard.js` - à¾ÔèÁ/á¡é¡ÒÃì´
+**What it does:**
+- Scans all card collections in the database
+- Extracts keywords from: ability, ability_text, sub_skill_1, sub_skill_2, unity_effect, unity_effect_2, unity_effect_3
+- Matches against predefined KEYWORD_MECHANICS list
+- Updates `keywords_mechanic` field with found keywords
+- Shows progress and results for each collection
+
+### `updateImages.js` - Update Card Images
+```bash
+node scripts/updateImages.js              # From code
+node scripts/updateImages.js cards.json   # From JSON file
+```
+
+### `upsertCard.js` - Insert/Update Cards
 ```bash
 node scripts/upsertCard.js
 ```
 
 ---
 
-## ?? Migration Scripts (ãªéáÅéÇ)
+## ?? Migration Scripts (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 
-- `migrateToDeckDB.js` - ÂéÒÂ¢éÍÁÙÅ Card  Deck DB
-- `migrateCardNames.js` - ÍÑ¾à´µª×èÍ¡ÒÃì´
+- `migrateToDeckDB.js` - ï¿½ï¿½ï¿½Â¢ï¿½ï¿½ï¿½ï¿½ï¿½ Card  Deck DB
+- `migrateCardNames.js` - ï¿½Ñ¾à´µï¿½ï¿½ï¿½Í¡ï¿½ï¿½ï¿½
 
 ---
 
 ## ?? API Endpoints
 
-**ÍÑ¾à´µ¡ÒÃì´à´ÕÂÇ:**
+**ï¿½Ñ¾à´µï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:**
 ```bash
 POST /api/admin/update-image
 {"cardName":"Star-Lord","imageUrl":"https://..."}
 ```
 
-**ÍÑ¾à´µËÅÒÂ¡ÒÃì´:**
+**ï¿½Ñ¾à´µï¿½ï¿½ï¿½Â¡ï¿½ï¿½ï¿½:**
 ```bash
 POST /api/admin/update-images-bulk
 {"images":[{"cardName":"...","imageUrl":"..."}]}
