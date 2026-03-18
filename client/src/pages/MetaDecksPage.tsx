@@ -25,7 +25,7 @@ const FACTION_COLORS: Record<string, string> = {
   Hydra: 'text-red-400',
   Villains: 'text-purple-400',
   Wakanda: 'text-orange-400',
-  Asgard: 'text-cyan-400',
+  Asgardian: 'text-cyan-400',
   'S.H.I.E.L.D.': 'text-gray-400',
   Neutral: 'text-slate-400',
 }

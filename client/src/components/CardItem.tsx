@@ -12,7 +12,7 @@ const FACTION_COLORS: Record<string, string> = {
   Hydra: 'text-red-400 bg-red-900/30 border-red-700',
   Villains: 'text-purple-400 bg-purple-900/30 border-purple-700',
   Wakanda: 'text-orange-400 bg-orange-900/30 border-orange-700',
-  Asgard: 'text-cyan-400 bg-cyan-900/30 border-cyan-700',
+  Asgardian: 'text-cyan-400 bg-cyan-900/30 border-cyan-700',
   'S.H.I.E.L.D.': 'text-gray-400 bg-gray-900/30 border-gray-600',
   Neutral: 'text-slate-400 bg-slate-900/30 border-slate-600',
 }

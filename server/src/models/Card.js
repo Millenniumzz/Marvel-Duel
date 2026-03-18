@@ -16,7 +16,7 @@ const cardSchema = new mongoose.Schema(
       required: true,
       enum: [
         'Agents',
-        'Asgard',
+        'Asgardian',
         'Avengers',
         'Brotherhood',
         'Collaboration',

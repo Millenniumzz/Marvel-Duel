@@ -6,7 +6,7 @@ import type { CardFilters } from '../types'
 const FACTIONS = [
   'all',
   'Agents',
-  'Asgard',
+  'Asgardian',
   'Brotherhood',
   'Collaboration',
   'Deadpool Corps',

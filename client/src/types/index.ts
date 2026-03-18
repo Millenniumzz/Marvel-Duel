@@ -7,7 +7,7 @@ export type Faction =
   | 'Hydra'
   | 'Villains'
   | 'Wakanda'
-  | 'Asgard'
+  | 'Asgardian'
   | 'S.H.I.E.L.D.'
   | 'Neutral'
 

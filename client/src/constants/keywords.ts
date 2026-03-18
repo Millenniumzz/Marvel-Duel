@@ -10,7 +10,7 @@ export const KEYWORD_MECHANICS = [
   'Lock-On', 'Alpha Power', 'Ranged', 'Intelligence', 'Time reversion',
   'Inspire', 'Ongoing', 'Resurrect', 'Big Idea', 'Genius Idea', 'Triple Alliance',
   'Magnetic Equipment', 'Magnetic Warrior', 'On Reveal', 'Miracle', 'Infinity Stones',
-  'Surge', 'Shark Treasure', 'United Front',
+  'Surge', 'Shark Treasure', 'United Front', 'Stormbringer', 'Thunder',
   // Special Character names
   'Groot Character', 'Thor Character', 'Frost Character', 'Spider-Man Character',
   'Vishanti Character', 'Scarlet Witch Character'

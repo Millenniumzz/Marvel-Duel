@@ -39,7 +39,7 @@ async function seed() {
     const avengersCards = insertedCards.filter((c) => c.faction === 'Avengers');
     const xmenCards = insertedCards.filter((c) => c.faction === 'X-Men');
     const guardianCards = insertedCards.filter((c) => c.faction === 'Guardians of the Galaxy');
-    const asgardCards = insertedCards.filter((c) => c.faction === 'Asgard');
+    const AsgardianCards = insertedCards.filter((c) => c.faction === 'Asgardian');
 
     const getCard = (name) => insertedCards.find((c) => c.name === name);
 
