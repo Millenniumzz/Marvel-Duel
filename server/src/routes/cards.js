@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 // List of all deck collections
 const DECK_COLLECTIONS = [
   'GuardiansoftheGalaxy',
-  'Asgard',
+  'Asgardian',
   'IntergalacticWar',
   'StarkIndustries',
   'SpiderVerse',
@@ -23,6 +23,77 @@ const DECK_COLLECTIONS = [
   'Collaboration',
 ];
 
+// Helper function to get card type for sorting
+const getCardTypeForSorting = (card) => {
+  return card.type;
+};
+
+// Helper function to get type sort order
+const getTypeSortOrder = (type) => {
+  const order = {
+    'Character': 1,
+    'Equipment': 2,
+    'Pow': 3,
+    'Tactics Card': 4,
+  };
+  return order[type] || 999;
+};
+
+// Helper function to get rarity sort order
+const getRaritySortOrder = (rarity) => {
+  const order = {
+    'Legendary': 1,
+    'Epic': 2,
+    'Rare': 3,
+    'Common': 4,
+    'Multiverse': 5,
+  };
+  return order[rarity] || 999;
+};
+
+// Helper function to get card ID for sorting
+const getCardIdForSorting = (card) => {
+  // Try card_number first
+  if (card.card_number) {
+    const numStr = card.card_number.replace(/\D/g, '');
+    const num = parseInt(numStr, 10);
+    if (!isNaN(num)) return num;
+  }
+  
+  // Try record_id
+  if (card.record_id) {
+    return card.record_id;
+  }
+  
+  // Try _id if it's numeric
+  if (card._id) {
+    const num = parseInt(card._id, 10);
+    if (!isNaN(num)) return num;
+  }
+  
+  return 999999;
+};
+
+// Standard card sorting comparator
+const compareCards = (a, b) => {
+  // 1. Sort by cost (ascending)
+  const costDiff = (a.cost || 0) - (b.cost || 0);
+  if (costDiff !== 0) return costDiff;
+  
+  // 2. Sort by type order
+  const typeA = getCardTypeForSorting(a);
+  const typeB = getCardTypeForSorting(b);
+  const typeOrderDiff = getTypeSortOrder(typeA) - getTypeSortOrder(typeB);
+  if (typeOrderDiff !== 0) return typeOrderDiff;
+  
+  // 3. Sort by rarity
+  const rarityOrderDiff = getRaritySortOrder(a.rarity) - getRaritySortOrder(b.rarity);
+  if (rarityOrderDiff !== 0) return rarityOrderDiff;
+  
+  // 4. Sort by card ID
+  return getCardIdForSorting(a) - getCardIdForSorting(b);
+};
+
 // GET /api/cards - Get all cards with search & filter
 router.get('/', async (req, res) => {
   try {
@@ -34,6 +105,7 @@ router.get('/', async (req, res) => {
       costMax,
       type,
       rarity,
+      battle_style,
       sort = 'name',
       page = 1,
       limit = 24,
@@ -42,74 +114,34 @@ router.get('/', async (req, res) => {
     // Determine which collections to query
     let collectionsToQuery = DECK_COLLECTIONS;
     
-    // If faction filter is specified, only query that collection
+    // If faction filter is specified, only query matching collections
     if (faction && faction !== 'all') {
       const collectionName = faction.replace(/[^a-zA-Z0-9]/g, '');
-      collectionsToQuery = [collectionName];
+      if (DECK_COLLECTIONS.includes(collectionName)) {
+        collectionsToQuery = [collectionName];
+      }
     }
 
-    // Query all relevant collections and extract records
+    // Query all relevant collections directly
     let allCards = [];
+    const db = mongoose.connection.db;
+    
     for (const collName of collectionsToQuery) {
       try {
-        const db = mongoose.connection.db;
         const collection = db.collection(collName);
+        const docs = await collection.find({}).toArray();
         
-        // Get the deck document
-        const deckDoc = await collection.findOne({});
-        
-        if (deckDoc && deckDoc.records && Array.isArray(deckDoc.records)) {
-          // Extract records and map to card format
-          const cards = deckDoc.records.map(record => ({
-            _id: record.record_id || record._id,
-            card_id: record.card_id,
-            record_id: record.record_id,
-            name: record.display_name || record.base_card_name,
-            base_card_name: record.base_card_name,
-            display_name: record.display_name,
-            nameTh: '', // ไม่มีในข้อมูลใหม่
-            faction: record.faction || record.deck_name,
-            deck_name: record.deck_name,
-            deck_group: record.deck_name,
-            cost: parseInt(record.cost) || 0,
-            type: 'Character', // default - could infer from data later
-            power: parseInt(record.attack) || 0,
-            health: parseInt(record.armor) || 0,
-            attack: parseInt(record.attack) || 0,
-            armor: parseInt(record.armor) || 0,
-            description: record.description || record.flavor_text || '',
-            descriptionTh: record.description_th || record.flavor_text_th || '',
-            ability: record.ability,
-            ability_text: record.ability_text || record.ability,
-            sub_skill_1: record.sub_skill_1,
-            sub_skill_2: record.sub_skill_2,
-            unity_effect: record.unity_effect,
-            unity_text: record.unity_text || record.unity_effect,
-            unity_member: record.unity_member,
-            unity_effect_2: record.unity_effect_2,
-            unity_member_2: record.unity_member_2,
-            unity_effect_3: record.unity_effect_3,
-            unity_member_3: record.unity_member_3,
-            battle_style: record.battle_style,
-            image: record.image_url || '',
-            image_url: record.image_url,
-            card_number: record.card_number,
-            rarity: record.rarity || 'Common',
-            keywords: record.keywords_mechanic ? record.keywords_mechanic.join(', ') : '',
-            keywords_mechanic: record.keywords_mechanic || record.keyword_mechanic || [],
-            keywords_team: record.keywords_team || [],
-            keyword_mechanic: record.keyword_mechanic || record.keywords_mechanic || [],
-            has_unity: record.has_unity || false,
-            variant_type: record.variant_type,
-            variant_label: record.variant_label,
-            availability_status: record.availability_status,
-            patch_version: record.patch_version,
-            source_type: record.source_type,
-            inference_confidence: record.inference_confidence,
-            needs_manual_verification: record.needs_manual_verification,
-          }));
-          
-          allCards = allCards.concat(cards);
+        // Check if collection uses "records" array structure
+        if (docs.length > 0 && docs[0].records && Array.isArray(docs[0].records)) {
+          // Extract from records array (old structure)
+          docs.forEach(doc => {
+            if (doc.records) {
+              allCards.push(...doc.records);
+            }
+          });
+        } else {
+          // Flat structure (1 doc = 1 card)
+          allCards.push(...docs);
         }
       } catch (err) {
         console.warn(`Warning: Could not query collection ${collName}:`, err.message);
@@ -118,40 +150,92 @@ router.get('/', async (req, res) => {
 
     // Apply filters
     let filteredCards = allCards;
-
+    
     // Text search
     if (search && search.trim()) {
       const searchLower = search.trim().toLowerCase();
-      filteredCards = filteredCards.filter(card => 
-        (card.name && card.name.toLowerCase().includes(searchLower)) ||
-        (card.description && card.description.toLowerCase().includes(searchLower)) ||
-        (card.keywords && card.keywords.toLowerCase().includes(searchLower))
-      );
+      filteredCards = filteredCards.filter(card => {
+        const name = card.name || card.display_name || '';
+        const desc = card.description || card.flavor_text || '';
+        const keywords = Array.isArray(card.keywords_mechanic) ? card.keywords_mechanic.join(' ') : '';
+        return name.toLowerCase().includes(searchLower) || 
+               desc.toLowerCase().includes(searchLower) ||
+               keywords.toLowerCase().includes(searchLower);
+      });
     }
-
+    
     // Cost filter
     if (cost !== undefined && cost !== '' && cost !== 'all') {
       filteredCards = filteredCards.filter(card => card.cost === Number(cost));
     }
-
+    
     // Type filter
     if (type && type !== 'all') {
       filteredCards = filteredCards.filter(card => card.type === type);
     }
-
+    
     // Rarity filter
     if (rarity && rarity !== 'all') {
       filteredCards = filteredCards.filter(card => card.rarity === rarity);
     }
+    
+    // Battle Style filter
+    if (battle_style && battle_style !== 'all') {
+      filteredCards = filteredCards.filter(card => card.battle_style === battle_style);
+    }
 
-    // Sort results
-    filteredCards.sort((a, b) => {
-      if (sort === 'name') return (a.name || '').localeCompare(b.name || '');
-      if (sort === 'cost_asc') return (a.cost || 0) - (b.cost || 0);
-      if (sort === 'cost_desc') return (b.cost || 0) - (a.cost || 0);
-      if (sort === 'power') return (b.power || 0) - (a.power || 0);
-      return 0;
-    });
+    // Map cards to response format
+    filteredCards = filteredCards.map(record => ({
+      _id: record._id || record.record_id,
+      card_id: record.card_id,
+      record_id: record.record_id,
+      name: record.name || record.display_name || record.base_card_name,
+      base_card_name: record.base_card_name,
+      display_name: record.display_name,
+      nameTh: record.nameTh || '',
+      faction: record.faction || record.deck_name,
+      deck_name: record.deck_name,
+      deck_group: record.deck_group,
+      cost: parseInt(record.cost) || 0,
+      type: record.type || 'Character',
+      power: parseInt(record.attack) || 0,
+      health: parseInt(record.armor) || 0,
+      attack: parseInt(record.attack) || 0,
+      armor: parseInt(record.armor) || 0,
+      description: record.description || record.flavor_text || '',
+      descriptionTh: record.descriptionTh || record.description_th || record.flavor_text_th || '',
+      ability: record.ability,
+      ability_text: record.ability_text || record.ability,
+      sub_skill_1: record.sub_skill_1,
+      sub_skill_2: record.sub_skill_2,
+      unity_effect: record.unity_effect,
+      unity_text: record.unity_text || record.unity_effect,
+      unity_member: record.unity_member,
+      unity_effect_2: record.unity_effect_2,
+      unity_member_2: record.unity_member_2,
+      unity_effect_3: record.unity_effect_3,
+      unity_member_3: record.unity_member_3,
+      battle_style: record.battle_style,
+      image: record.image || record.image_url || '',
+      image_url: record.image_url,
+      card_number: record.card_number,
+      rarity: record.rarity || 'Common',
+      keywords: Array.isArray(record.keywords_mechanic) ? record.keywords_mechanic.join(', ') : (record.keywords || ''),
+      keywords_mechanic: record.keywords_mechanic || record.keyword_mechanic || [],
+      keywords_team: record.keywords_team || [],
+      keyword_mechanic: record.keyword_mechanic || record.keywords_mechanic || [],
+      has_unity: record.has_unity || false,
+      variant_type: record.variant_type,
+      variant_label: record.variant_label,
+      availability_status: record.availability_status,
+      patch_version: record.patch_version,
+      source_type: record.source_type,
+      inference_confidence: record.inference_confidence,
+      needs_manual_verification: record.needs_manual_verification,
+    }));
+
+    // Sort results using standard sorting (Cost -> Type -> Rarity -> Card ID)
+    filteredCards.sort(compareCards);
 
     // Paginate
     const total = filteredCards.length;
@@ -216,10 +300,10 @@ router.get('/:id', async (req, res) => {
               nameTh: '',
               faction: record.faction || record.deck_name,
               deck_group: record.deck_name,
-              cost: parseInt(record.cost_red_gem) || 0,
-              type: 'Character',
+              cost: parseInt(record.cost) || 0,
+              type: record.type || 'Character',
               power: parseInt(record.attack) || 0,
-              health: 0,
+              health: parseInt(record.armor) || 0,
               attack: record.attack,
               armor: record.armor,
               description: record.ability_text || '',
@@ -227,7 +311,7 @@ router.get('/:id', async (req, res) => {
               unity_text: record.unity_text,
               battle_style: record.battle_style,
               image: record.image_url || '',
-              rarity: 'Common',
+              rarity: record.rarity || 'Common',
               keywords: record.keywords_mechanic ? record.keywords_mechanic.join(', ') : '',
               has_unity: record.has_unity,
               variant_type: record.variant_type,

@@ -1,120 +1,33 @@
-import { X, Swords, Shield, Zap } from 'lucide-react'
+import { X, Swords, Shield } from 'lucide-react'
 import { useState } from 'react'
 import type { Card } from '../types'
 import { useCardImage } from '../hooks/useCardImage'
+import { BATTLE_STYLE_ICONS, FACTION_COLORS } from '../constants/icons'
+import { highlightKeywords } from '../utils/textHighlighter'
 
 const BATTLE_STYLE_COLORS: Record<string, string> = {
   Attack: 'bg-red-600/20 text-red-300 border-2 border-red-500',
   Guardian: 'bg-blue-600/20 text-blue-300 border-2 border-blue-500',
   Support: 'bg-yellow-600/20 text-yellow-300 border-2 border-yellow-500',
+  Pow: 'bg-purple-600/20 text-purple-300 border-2 border-purple-500',
+  'Tactics Card': 'bg-green-600/20 text-green-300 border-2 border-green-500',
 }
 
-// Keywords to highlight in ability text (yellow)
-const KEYWORD_MECHANICS = [
-  'Invocation', 'Unity', 'Last Words', 'Bounty', 'Bounty Hunter', 'Triumph',
-  'Assault', 'Defeat', 'Stunned', 'Tried and True', 'Decay', 'Guard',
-  'Iron Will', 'Retaliate', 'Burst', 'Awaken', 'Pierce', 'Collection',
-  'Illusion', 'Critical Hit', 'Reinforcement', 'Assemble', 'Annihilate',
-  'Speed Strike', 'Lore', 'Special Action', 'Forerunner', 'Visionary',
-  'Cloaked', 'Puncture', 'Flanker', 'Enhance', 'unique effect', 'Teleport',
-  'Inhibited', 'Beast', 'Sacrifice', 'Maverick', 'Quest', 'Inhibition Layer',
-  'Lock-On', 'Alpha Power', 'Ranged', 'Intelligence', 'Time reversion',
-  'Inspire', 'Ongoing', 'Resurrect', 'Big Idea', 'Genius Idea', 'Triple Alliance',
-  'Magnetic Equipment', 'Magnetic Warrior', 'On Reveal', 'Miracle', 'Infinity Stones',
-  'Surge', 'Shark Treasure','United Front',
-  // Special Character names
-  'Groot Character', 'Thor Character', 'Frost Character', 'Spider-Man Character',
-  'Vishanti Character', 'Scarlet Witch Character'
-]
+const TYPE_COLORS: Record<string, string> = {
+  Character: 'bg-red-500/20 text-red-300 border border-red-500/50',
+  Equipment: 'bg-blue-500/20 text-blue-300 border border-blue-500/50',
+  Pow: 'bg-purple-500/20 text-purple-300 border border-purple-500/50',
+  'Tactics Card': 'bg-green-500/20 text-green-300 border border-green-500/50',
+  Action: 'bg-green-500/20 text-green-300 border border-green-500/50',
+}
 
-// Faction names to highlight in ability text (blue)
-const FACTION_KEYWORDS = [
-  'GotG', 'Asgardian', 'Intergalactic war', 'Stark Industries', 'Spider-Verse',
-  'Marvel Knight', 'Agents', 'Mystic', 'Dark Dimension', 'Eternals',
-  'X-Men', 'Brotherhood', 'Deadpool Corps', 'Avengers', 'S.H.I.E.L.D',
-  'Hydra', 'Black Order', 'WotS', 'Fantastic Four'
-]
+// Helper function to get display type
+const getDisplayType = (card: Card): string => {
+  return card.type
+}
 
-// Battle Style keywords to highlight (separate colors)
-const BATTLE_STYLE_KEYWORDS = [
-  { keyword: 'Tactics Card', color: 'text-green-400' },
-  { keyword: 'Attack', color: 'text-red-400' },
-  { keyword: 'Guardian', color: 'text-blue-400' },
-  { keyword: 'Support', color: 'text-yellow-400' }
-]
-
-// Helper function to highlight keywords in text
-const highlightKeywords = (text: string) => {
-  if (!text) return null
-  
-  let processedText = text
-  const replacements: { keyword: string; placeholder: string; originalMatch: string; colorClass: string }[] = []
-  let placeholderIndex = 0
-  
-  // Sort all keywords by length (longest first) to avoid partial matches
-  const allKeywords = [
-    ...KEYWORD_MECHANICS.map(k => ({ keyword: k, colorClass: 'text-yellow-400 font-bold', useWordBoundary: true })),
-    ...FACTION_KEYWORDS.map(k => ({ keyword: k, colorClass: 'text-cyan-400 font-bold', useWordBoundary: false })),
-    ...BATTLE_STYLE_KEYWORDS.map(k => ({ keyword: k.keyword, colorClass: `${k.color} font-bold`, useWordBoundary: true }))
-  ].sort((a, b) => b.keyword.length - a.keyword.length)
-  
-  // Replace keywords with placeholders
-  allKeywords.forEach(({ keyword, colorClass, useWordBoundary }) => {
-    // For special character names, create variations
-    const isSpecialChar = keyword.includes(' Character')
-    const patterns = isSpecialChar 
-      ? [keyword + 's', keyword] // Try plural first, then singular
-      : [keyword]
-    
-    patterns.forEach(pattern => {
-      // Case-insensitive global replace with optional word boundary
-      const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const regexPattern = useWordBoundary ? `\\b${escapedPattern}\\b` : escapedPattern
-      const regex = new RegExp(regexPattern, 'gi')
-      
-      let match
-      while ((match = regex.exec(processedText)) !== null) {
-        const placeholder = `__KW${placeholderIndex}__`
-        const matchedText = match[0]
-        
-        // Replace this occurrence
-        processedText = processedText.substring(0, match.index) + 
-                       placeholder + 
-                       processedText.substring(match.index + matchedText.length)
-        
-        replacements.push({ 
-          keyword: matchedText, 
-          placeholder, 
-          originalMatch: matchedText,
-          colorClass
-        })
-        
-        placeholderIndex++
-        
-        // Reset regex after replacement
-        regex.lastIndex = 0
-      }
-    })
-  })
-  
-  // Split text and create elements
-  const parts = processedText.split(/(__KW\d+__)/)
-  
-  return (
-    <>
-      {parts.map((part, index) => {
-        const replacement = replacements.find(r => r.placeholder === part)
-        if (replacement) {
-          return (
-            <span key={index} className={replacement.colorClass}>
-              {replacement.keyword}
-            </span>
-          )
-        }
-        return <span key={index}>{part}</span>
-      })}
-    </>
-  )
+const getBattleStyle = (card: Card): string => {
+  return card.battle_style || ''
 }
 
 interface CardModalProps {
@@ -127,6 +40,11 @@ type Tab = 'details' | 'multiverse'
 export default function CardModal({ card, onClose }: CardModalProps) {
   const [activeTab, setActiveTab] = useState<Tab>('details')
   const { imageUrl, loading } = useCardImage(card)
+
+  // Get display type based on card type and battle_style
+  const displayType = getDisplayType(card)
+  const battleStyle = getBattleStyle(card)
+  const IconBS = BATTLE_STYLE_ICONS[battleStyle] || Shield
 
   // Parse keywords if it's a string
   const keywordsArray = typeof card.keywords === 'string' 
@@ -179,7 +97,7 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                   <img 
                     src={imageUrl} 
                     alt={card.name} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-gradient-to-br from-gray-800 to-black"
                     onError={(e) => {
                       // Fallback to placeholder if proxy fails
                       e.currentTarget.src = '/placeholder-card.png';
@@ -188,11 +106,11 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                 </div>
                 
                 {/* Attack/Armor badges at bottom */}
-                {card.type === 'Character' && (
+                {displayType === 'Character' && (
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
                     <div className="bg-red-600/90 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg border-2 border-red-400">
                       <Swords size={20} className="text-white" />
-                      <span className="text-2xl font-black text-white">{card.attack || card.power || 0}</span>
+                      <span className="text-2xl font-black text-white">{card.attack || 0}</span>
                     </div>
                     <div className="bg-blue-600/90 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg border-2 border-blue-400">
                       <Shield size={20} className="text-white" />
@@ -251,7 +169,7 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                     <div className="flex items-center gap-3">
                       <span className="text-gray-400 font-semibold text-sm">Battle Style:</span>
                       <span className={`px-4 py-2 rounded-lg font-bold text-base ${battleStyleColor} flex items-center gap-2`}>
-                        <Swords size={18} />
+                        <IconBS size={18} />
                         {card.battle_style}
                       </span>
                     </div>
@@ -429,32 +347,35 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                         {card.rarity}
                       </span>
                     )}
-                    {card.faction && (
-                      <span className="bg-blue-600/20 text-blue-300 border border-blue-600/40 px-3 py-1.5 rounded-md text-sm font-semibold">
-                        {card.faction}
-                      </span>
-                    )}
+                    {card.faction && (() => {
+                      // Handle multi-faction (array or comma-separated string)
+                      const factions = Array.isArray(card.faction) 
+                        ? card.faction 
+                        : card.faction.split(',').map(f => f.trim()).filter(Boolean);
+                      
+                      return factions.map((faction, idx) => {
+                        const color = FACTION_COLORS[faction] || 'bg-gray-600/20 text-gray-300 border border-gray-600/40';
+                        return (
+                          <span key={idx} className={`px-3 py-1.5 rounded-md text-sm font-semibold ${color}`}>
+                            {faction}
+                          </span>
+                        );
+                      });
+                    })()}
                     {card.deck_group && card.deck_group !== card.faction && (
                       <span className="bg-purple-600/20 text-purple-300 border border-purple-600/40 px-3 py-1.5 rounded-md text-sm font-semibold">
                         {card.deck_group}
                       </span>
                     )}
-                    {card.type && (
-                      <span className="bg-gray-700/50 text-gray-300 border border-gray-600 px-3 py-1.5 rounded-md text-sm">
-                        {card.type}
+                    {displayType &&(
+                      <span className={`px-3 py-1.5 rounded-md text-sm font-semibold ${
+                        TYPE_COLORS[displayType] || 'bg-gray-700/50 text-gray-300 border border-gray-600'
+                      }`}>
+                        {displayType}
                       </span>
                     )}
                   </div>
                 </>
-              )}
-
-              {activeTab === 'multiverse' && (
-                <div className="text-center py-12">
-                  <p className="text-gray-400 text-lg mb-4">🌌 Multiverse Variants</p>
-                  <p className="text-gray-500 text-sm">
-                    Coming soon... This section will show different versions of this card.
-                  </p>
-                </div>
               )}
             </div>
           </div>

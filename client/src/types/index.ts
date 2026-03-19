@@ -1,15 +1,26 @@
-export type CardType = 'Character' | 'Action' | 'Equip'
+export type CardType = 'Character' | 'Equipment' | 'Pow' | 'Tactics Card'
 
 export type Faction =
+  | 'Agents'
+  | 'Asgardian'
   | 'Avengers'
+  | 'Brotherhood'
+  | 'Collaboration'
+  | 'Deadpool Corps'
+  | 'Dark Dimension'
+  | 'Eternals'
   | 'Guardians of the Galaxy'
-  | 'X-Men'
   | 'Hydra'
-  | 'Villains'
-  | 'Wakanda'
-  | 'Asgard'
-  | 'S.H.I.E.L.D.'
+  | 'Intergalactic War'
+  | 'Marvel Knights'
+  | 'Mystics'
   | 'Neutral'
+  | 'Ragnarok'
+  | 'S.H.I.E.L.D.'
+  | 'Special'
+  | 'Spider-Verse'
+  | 'Stark Industries'
+  | 'X-Men'
 
 export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary'| 'Multiverse'
 
@@ -26,7 +37,7 @@ export interface Card {
   display_name?: string
   
   // Faction & Deck
-  faction: Faction
+  faction: Faction | string  // Can be single faction or comma-separated string or array
   deck_name?: string
   deck_group?: string
   
@@ -35,8 +46,6 @@ export interface Card {
   type: CardType
   
   // Stats
-  power: number
-  health: number
   attack?: number
   armor?: number
   
@@ -74,7 +83,6 @@ export interface Card {
   keywords: string | string[]
   keywords_mechanic?: string[]
   keywords_team?: string[]
-  keyword_mechanic?: string[]
   
   // Variant Info
   variant_type?: string
@@ -152,6 +160,7 @@ export interface CardFilters {
   cost: string
   type: string
   rarity: string
+  battle_style: string
   sort: string
   page: number
   limit: number

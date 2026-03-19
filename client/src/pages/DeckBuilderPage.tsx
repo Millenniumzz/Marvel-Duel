@@ -6,6 +6,8 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import toast from 'react-hot-toast'
 import { X, Save, Trash2, Plus, Minus, BookOpen, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Card, CardFilters, Deck, DeckCard } from '../types'
+import { compareCards } from '../utils/cardSorting'
+import { FACTION_COLORS } from '../constants/icons'
 
 const MAX_DECK_SIZE = 30
 const MAX_COPIES = 3
@@ -26,6 +28,7 @@ export default function DeckBuilderPage() {
     cost: 'all',
     type: 'all',
     rarity: 'all',
+    battle_style: 'all',
     sort: 'cost_asc',
     page: 1,
     limit: 30,
@@ -39,8 +42,11 @@ export default function DeckBuilderPage() {
       if (params.cost === 'all') delete params.cost
       if (params.type === 'all') delete params.type
       if (params.rarity === 'all') delete params.rarity
+      if (params.battle_style === 'all') delete params.battle_style
 
       const res = await cardsApi.getCards(params)
+      
+      // Server already sorts the cards, no need to sort again
       setCards(res.data.cards)
     } catch (err) {
       console.error(err)
@@ -158,7 +164,16 @@ export default function DeckBuilderPage() {
     const factionCounts: Record<string, number> = {}
     deck.forEach(({ card, quantity }) => {
       if (card.faction !== 'Neutral') {
-        factionCounts[card.faction] = (factionCounts[card.faction] || 0) + quantity
+        // Parse multi-faction cards (comma-separated)
+        const factions = Array.isArray(card.faction)
+          ? card.faction
+          : card.faction.split(',').map(f => f.trim()).filter(Boolean);
+        
+        factions.forEach(faction => {
+          if (faction !== 'Neutral') {
+            factionCounts[faction] = (factionCounts[faction] || 0) + quantity;
+          }
+        });
       }
     })
     if (Object.keys(factionCounts).length === 0) return 'Neutral'
@@ -205,9 +220,26 @@ export default function DeckBuilderPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-white text-sm">{d.name}</p>
-                    <p className="text-gray-400 text-xs">
-                      {d.faction} • {d.totalCards} การ์ด
-                    </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(() => {
+                        const factions = Array.isArray(d.faction)
+                          ? d.faction
+                          : typeof d.faction === 'string' && d.faction.includes(',')
+                          ? d.faction.split(',').map(f => f.trim()).filter(Boolean)
+                          : [d.faction];
+                        
+                        return factions.map((faction, idx) => {
+                          const color = FACTION_COLORS[faction] || 'text-gray-400 bg-gray-900/30 border-gray-600';
+                          return (
+                            <span key={idx} className={`px-2 py-0.5 rounded text-xs font-semibold border ${color}`}>
+                              {faction}
+                            </span>
+                          );
+                        });
+                      })()}
+                      <span className="text-gray-600">•</span>
+                      <span className="text-gray-400 text-xs">{d.totalCards} การ์ด</span>
+                    </div>
                   </div>
                   <button
                     onClick={() => loadDeck(d)}
@@ -306,8 +338,8 @@ export default function DeckBuilderPage() {
                   <span className="text-xs">กดปุ่ม "+ เพิ่มลงเดค" เพื่อเพิ่มการ์ด</span>
                 </p>
               ) : (
-                deck
-                  .sort((a, b) => a.card.cost - b.card.cost)
+                [...deck]
+                  .sort((a, b) => compareCards(a.card, b.card))
                   .map(({ card, quantity }) => (
                     <div
                       key={card._id}

@@ -6,6 +6,7 @@ import CardModal from '../components/CardModal'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { ChevronLeft, ChevronRight, LayoutGrid, List } from 'lucide-react'
 import type { Card, CardFilters } from '../types'
+import { FACTION_COLORS } from '../constants/icons'
 
 export default function CardsPage() {
   const [cards, setCards] = useState<Card[]>([])
@@ -20,6 +21,7 @@ export default function CardsPage() {
     cost: 'all',
     type: 'all',
     rarity: 'all',
+    battle_style: 'all',
     sort: 'name',
     page: 1,
     limit: 24,
@@ -33,8 +35,11 @@ export default function CardsPage() {
       if (params.cost === 'all') delete params.cost
       if (params.type === 'all') delete params.type
       if (params.rarity === 'all') delete params.rarity
+      if (params.battle_style === 'all') delete params.battle_style
 
       const res = await cardsApi.getCards(params)
+      
+      // Server already sorts the cards, no need to sort again
       setCards(res.data.cards)
       setTotal(res.data.total)
       setTotalPages(res.data.totalPages)
@@ -178,8 +183,21 @@ function CardListItem({ card }: CardListItemProps) {
             <p className="font-bold text-white truncate">{card.name}</p>
             {card.nameTh && <span className="text-gray-400 text-sm truncate hidden sm:block">{card.nameTh}</span>}
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-gray-500">{card.faction}</span>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            {(() => {
+              const factions = Array.isArray(card.faction) 
+                ? card.faction 
+                : card.faction.split(',').map(f => f.trim()).filter(Boolean);
+              
+              return factions.map((faction, idx) => {
+                const color = FACTION_COLORS[faction] || 'text-gray-400 bg-gray-900/30 border-gray-600';
+                return (
+                  <span key={idx} className={`px-2 py-0.5 rounded text-xs font-semibold border ${color}`}>
+                    {faction}
+                  </span>
+                );
+              });
+            })()}
             <span className="text-gray-700">•</span>
             <span className="text-xs text-gray-500">{card.type}</span>
             <span className="text-gray-700">•</span>
@@ -188,8 +206,8 @@ function CardListItem({ card }: CardListItemProps) {
         </div>
         {card.type === 'Character' && (
           <div className="flex items-center gap-3 text-sm flex-shrink-0">
-            <span className="text-red-400 font-bold">{card.power}⚔</span>
-            <span className="text-green-400 font-bold">{card.health}🛡</span>
+            <span className="text-red-400 font-bold">{card.attack}⚔</span>
+            <span className="text-green-400 font-bold">{card.armor}🛡</span>
           </div>
         )}
       </div>

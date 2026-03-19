@@ -5,7 +5,7 @@
 ## 🚀 Features
 
 - 🔍 **ค้นหาการ์ด** — ค้นหาด้วยชื่อภาษาไทย/อังกฤษ, คำอธิบาย
-- 🏷️ **กรอง Faction** — กรองตาม Avengers, X-Men, Guardians,Asgard และอื่น ๆ
+- 🏷️ **กรอง Faction** — กรองตาม Avengers, X-Men, Guardians,Asgardian และอื่น ๆ
 - 💎 **กรอง Cost / Rarity / Type** — ค้นหาการ์ดตามต้นทุน ความหายาก และประเภท
 - 🃏 **Deck Builder** — สร้าง, บันทึก และจัดการเดคการ์ด
 - 📊 **Meta Decks** — เดคแนะนำพร้อม Tier List และอัตราการชนะ
