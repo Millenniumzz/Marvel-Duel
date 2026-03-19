@@ -1,15 +1,26 @@
 export type CardType = 'Character' | 'Equipment' | 'Pow' | 'Tactics Card'
 
 export type Faction =
-  | 'Avengers'
-  | 'Guardians of the Galaxy'
-  | 'X-Men'
-  | 'Hydra'
-  | 'Villains'
-  | 'Wakanda'
+  | 'Agents'
   | 'Asgardian'
-  | 'S.H.I.E.L.D.'
+  | 'Avengers'
+  | 'Brotherhood'
+  | 'Collaboration'
+  | 'Deadpool Corps'
+  | 'Dark Dimension'
+  | 'Eternals'
+  | 'Guardians of the Galaxy'
+  | 'Hydra'
+  | 'Intergalactic War'
+  | 'Marvel Knights'
+  | 'Mystics'
   | 'Neutral'
+  | 'Ragnarok'
+  | 'S.H.I.E.L.D.'
+  | 'Special'
+  | 'Spider-Verse'
+  | 'Stark Industries'
+  | 'X-Men'
 
 export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary'| 'Multiverse'
 
@@ -26,7 +37,7 @@ export interface Card {
   display_name?: string
   
   // Faction & Deck
-  faction: Faction
+  faction: Faction | string  // Can be single faction or comma-separated string or array
   deck_name?: string
   deck_group?: string
   

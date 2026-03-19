@@ -2,7 +2,7 @@ import { X, Swords, Shield } from 'lucide-react'
 import { useState } from 'react'
 import type { Card } from '../types'
 import { useCardImage } from '../hooks/useCardImage'
-import { BATTLE_STYLE_ICONS } from '../constants/icons'
+import { BATTLE_STYLE_ICONS, FACTION_COLORS } from '../constants/icons'
 import { highlightKeywords } from '../utils/textHighlighter'
 
 const BATTLE_STYLE_COLORS: Record<string, string> = {
@@ -347,11 +347,21 @@ export default function CardModal({ card, onClose }: CardModalProps) {
                         {card.rarity}
                       </span>
                     )}
-                    {card.faction && (
-                      <span className="bg-blue-600/20 text-blue-300 border border-blue-600/40 px-3 py-1.5 rounded-md text-sm font-semibold">
-                        {card.faction}
-                      </span>
-                    )}
+                    {card.faction && (() => {
+                      // Handle multi-faction (array or comma-separated string)
+                      const factions = Array.isArray(card.faction) 
+                        ? card.faction 
+                        : card.faction.split(',').map(f => f.trim()).filter(Boolean);
+                      
+                      return factions.map((faction, idx) => {
+                        const color = FACTION_COLORS[faction] || 'bg-gray-600/20 text-gray-300 border border-gray-600/40';
+                        return (
+                          <span key={idx} className={`px-3 py-1.5 rounded-md text-sm font-semibold ${color}`}>
+                            {faction}
+                          </span>
+                        );
+                      });
+                    })()}
                     {card.deck_group && card.deck_group !== card.faction && (
                       <span className="bg-purple-600/20 text-purple-300 border border-purple-600/40 px-3 py-1.5 rounded-md text-sm font-semibold">
                         {card.deck_group}

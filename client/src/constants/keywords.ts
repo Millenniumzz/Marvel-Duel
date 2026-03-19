@@ -21,7 +21,7 @@ export const FACTION_KEYWORDS = [
   'GotG', 'Asgardian', 'Intergalactic war', 'Stark Industries', 'Spider-Verse',
   'Marvel Knight', 'Agents', 'Mystic', 'Dark Dimension', 'Eternals',
   'X-Men', 'Brotherhood', 'Deadpool Corps', 'Avengers', 'S.H.I.E.L.D',
-  'Hydra', 'Black Order', 'WotS', 'Fantastic Four'
+  'Hydra', 'Black Order', 'WotS', 'Fantastic Four', 'Ragnarok',
 ]
 
 // Battle Style keywords to highlight (separate colors)
