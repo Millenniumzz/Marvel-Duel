@@ -3,19 +3,7 @@ import { Swords, Shield } from 'lucide-react'
 import CardModal from './CardModal'
 import type { Card } from '../types'
 import { useCardImage } from '../hooks/useCardImage'
-import { BATTLE_STYLE_ICONS, TYPE_ICONS } from '../constants/icons'
-
-const FACTION_COLORS: Record<string, string> = {
-  Avengers: 'text-blue-400 bg-blue-900/30 border-blue-700',
-  'Guardians of the Galaxy': 'text-green-400 bg-green-900/30 border-green-700',
-  'X-Men': 'text-yellow-400 bg-yellow-900/30 border-yellow-700',
-  Hydra: 'text-red-400 bg-red-900/30 border-red-700',
-  Villains: 'text-purple-400 bg-purple-900/30 border-purple-700',
-  Wakanda: 'text-orange-400 bg-orange-900/30 border-orange-700',
-  Asgard: 'text-cyan-400 bg-cyan-900/30 border-cyan-700',
-  'S.H.I.E.L.D.': 'text-gray-400 bg-gray-900/30 border-gray-600',
-  Neutral: 'text-slate-400 bg-slate-900/30 border-slate-600',
-}
+import { BATTLE_STYLE_ICONS, TYPE_ICONS, FACTION_COLORS } from '../constants/icons'
 
 const RARITY_BORDER: Record<string, string> = {
   Common: 'border-gray-600',
@@ -68,7 +56,7 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
   const displayType = getDisplayType(card)
   const Icon = TYPE_ICONS[displayType] || Swords
   const BattleStyleIcon = card.battle_style ? BATTLE_STYLE_ICONS[card.battle_style] : null
-  const factionColor = FACTION_COLORS[card.faction] || 'text-gray-400 bg-gray-900/30 border-gray-600'
+  
   const rarityBorder = RARITY_BORDER[card.rarity] || 'border-gray-600'
   const rarityGlow = RARITY_GLOW[card.rarity] || ''
   const rarityBadge = RARITY_BADGE[card.rarity] || 'bg-gray-700 text-gray-300'
@@ -143,9 +131,20 @@ export default function CardItem({ card, onAddToDeck, deckMode = false }: CardIt
               <Icon size={10} />
               {displayType}
             </span>
-            <span className={`text-xs px-1.5 py-0.5 rounded border ${factionColor}`}>
-              {card.faction}
-            </span>
+            {(() => {
+              const factions = Array.isArray(card.faction) 
+                ? card.faction 
+                : card.faction.split(',').map(f => f.trim()).filter(Boolean);
+              
+              return factions.map((faction, idx) => {
+                const color = FACTION_COLORS[faction] || 'text-gray-400 bg-gray-900/30 border-gray-600';
+                return (
+                  <span key={idx} className={`px-2 py-0.5 rounded text-xs font-semibold border ${color}`}>
+                    {faction}
+                  </span>
+                );
+              });
+            })()}
           </div>
 
           {/* Stats */}

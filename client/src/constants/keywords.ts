@@ -10,7 +10,7 @@ export const KEYWORD_MECHANICS = [
   'Lock-On', 'Alpha Power', 'Ranged', 'Intelligence', 'Time reversion',
   'Inspire', 'Ongoing', 'Resurrect', 'Big Idea', 'Genius Idea', 'Triple Alliance',
   'Magnetic Equipment', 'Magnetic Warrior', 'On Reveal', 'Miracle', 'Infinity Stones',
-  'Surge', 'Shark Treasure', 'United Front',
+  'Surge', 'Shark Treasure', 'United Front', 'Stormbringer', 'Thunder',
   // Special Character names
   'Groot Character', 'Thor Character', 'Frost Character', 'Spider-Man Character',
   'Vishanti Character', 'Scarlet Witch Character'
@@ -21,7 +21,7 @@ export const FACTION_KEYWORDS = [
   'GotG', 'Asgardian', 'Intergalactic war', 'Stark Industries', 'Spider-Verse',
   'Marvel Knight', 'Agents', 'Mystic', 'Dark Dimension', 'Eternals',
   'X-Men', 'Brotherhood', 'Deadpool Corps', 'Avengers', 'S.H.I.E.L.D',
-  'Hydra', 'Black Order', 'WotS', 'Fantastic Four'
+  'Hydra', 'Black Order', 'WotS', 'Fantastic Four', 'Ragnarok',
 ]
 
 // Battle Style keywords to highlight (separate colors)

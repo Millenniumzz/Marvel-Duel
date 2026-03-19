@@ -2,7 +2,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const mongoose = require('mongoose');
 
 const DECK_COLLECTIONS = [
-  'GuardiansoftheGalaxy', 'Asgard', 'IntergalacticWar', 'StarkIndustries',
+  'GuardiansoftheGalaxy', 'Asgardian', 'IntergalacticWar', 'StarkIndustries',
   'SpiderVerse', 'Ragnarok', 'MarvelKnights', 'Agents', 'Mystics', 'Eternals',
   'XMen', 'DeadpoolCorps', 'Brotherhood', 'Neutral', 'Special', 'Collaboration'
 ];
